@@ -395,7 +395,10 @@ select option{background:#0d1120}
         <div class="auth-card-title">Team Member Sign In</div>
         <div class="field">
           <label class="flbl">Workspace ID</label>
-          <input type="text" id="emp-workspace" placeholder="Enter workspace ID from your manager">
+          <input type="text" id="emp-workspace" placeholder="Enter workspace ID from your manager" 
+            oninput="this.value=this.value.trim()" 
+            onchange="loadEmpMembers()" 
+            onblur="loadEmpMembers()">
         </div>
         <div class="field">
           <label class="flbl">Your Name</label>
@@ -1466,16 +1469,21 @@ function setLoginRole(role) {
   document.getElementById('emp-err').classList.remove('show');
 }
 
-// Load members for a given workspace ID so employee can pick their name
-document.getElementById('emp-workspace').addEventListener('change', loadEmpMembers);
-document.getElementById('emp-workspace').addEventListener('blur', loadEmpMembers);
-
 async function loadEmpMembers() {
-  const wsId = document.getElementById('emp-workspace').value.trim();
+  const wsId = document.getElementById('emp-workspace')?.value.trim();
   const sel = document.getElementById('emp-name');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Loading... —</option>';
+  if (!wsId || wsId.length < 10) {
+    sel.innerHTML = '<option value="">— Select your name —</option>';
+    return;
+  }
+  const { data, error } = await sb.from('members').select('id,name,pin').eq('workspace_id', wsId);
   sel.innerHTML = '<option value="">— Select your name —</option>';
-  if (!wsId) return;
-  const { data } = await sb.from('members').select('id,name,pin').eq('workspace_id', wsId);
+  if (error) {
+    console.error('loadEmpMembers error:', error);
+    return;
+  }
   if (data && data.length) {
     data.forEach(m => {
       const o = document.createElement('option');
@@ -1484,6 +1492,9 @@ async function loadEmpMembers() {
       o.textContent = m.name;
       sel.appendChild(o);
     });
+  } else {
+    const errEl = document.getElementById('emp-err');
+    if(errEl){ errEl.textContent = 'No team members found for this Workspace ID.'; errEl.classList.add('show'); }
   }
 }
 
@@ -1501,26 +1512,35 @@ async function loginEmployee() {
   if (!pin) { errEl.textContent = 'Please enter your PIN.'; errEl.classList.add('show'); return; }
 
   const selectedOpt = sel.options[sel.selectedIndex];
-  const correctPin = selectedOpt.dataset.pin;
+  const correctPin = selectedOpt?.dataset?.pin;
 
-  if (!correctPin) { errEl.textContent = 'No PIN set for your account. Ask your manager.'; errEl.classList.add('show'); return; }
+  if (!correctPin) { errEl.textContent = 'No PIN set. Ask your manager to set your PIN.'; errEl.classList.add('show'); return; }
   if (pin !== correctPin) { errEl.textContent = 'Incorrect PIN. Please try again.'; errEl.classList.add('show'); return; }
 
   btn.disabled = true; btn.textContent = 'Signing in...';
 
-  // Load full workspace + all data for this employee
-  const { data: ws } = await sb.from('workspaces').select('*').eq('id', wsId).single();
-  if (!ws) { errEl.textContent = 'Workspace not found. Check your Workspace ID.'; errEl.classList.add('show'); btn.disabled=false; btn.textContent='Sign In →'; return; }
+  try {
+    // Load workspace
+    const { data: ws, error: wsErr } = await sb.from('workspaces').select('*').eq('id', wsId).single();
+    if (wsErr || !ws) { errEl.textContent = 'Workspace not found. Check your Workspace ID.'; errEl.classList.add('show'); btn.disabled=false; btn.textContent='Sign In →'; return; }
 
-  empWorkspace = ws;
-  workspace = ws;
-  const { data: memberData } = await sb.from('members').select('*').eq('id', memberId).single();
-  currentEmployee = memberData;
+    empWorkspace = ws;
+    workspace = ws;
 
-  await loadAllData();
-  setupEmployeeSidebar();
-  go('my-overview');
-  showScreen('app-screen');
+    // Load full member data
+    const { data: memberData, error: memErr } = await sb.from('members').select('*').eq('id', memberId).single();
+    if (memErr || !memberData) { errEl.textContent = 'Could not load your profile. Try again.'; errEl.classList.add('show'); btn.disabled=false; btn.textContent='Sign In →'; return; }
+    currentEmployee = memberData;
+
+    await loadAllData();
+    setupEmployeeSidebar();
+    go('my-overview');
+    showScreen('app-screen');
+  } catch(e) {
+    console.error('Employee login error:', e);
+    errEl.textContent = 'Login error: ' + e.message;
+    errEl.classList.add('show');
+  }
   btn.disabled=false; btn.textContent='Sign In →';
 }
 
@@ -1788,8 +1808,7 @@ async function addAgendaItem(sessionId) {
   if (!s) return;
   const existing = s.member_agenda ? s.member_agenda.split('\n').filter(Boolean) : [];
   existing.push(item);
-  const newAgenda = existing.join('
-');
+  const newAgenda = existing.join('\\n');
   const {error} = await sb.from('sessions').update({member_agenda: newAgenda}).eq('id', sessionId);
   if (error) { showToast('Error saving agenda item', true); return; }
   s.member_agenda = newAgenda;
@@ -1803,8 +1822,7 @@ async function removeAgendaItem(sessionId, idx) {
   if (!s) return;
   const items = s.member_agenda ? s.member_agenda.split('\n').filter(Boolean) : [];
   items.splice(parseInt(idx), 1);
-  const newAgenda = items.join('
-');
+  const newAgenda = items.join('\\n');
   await sb.from('sessions').update({member_agenda: newAgenda}).eq('id', sessionId);
   s.member_agenda = newAgenda;
   rMySS(document.getElementById('content'));
