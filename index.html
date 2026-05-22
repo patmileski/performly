@@ -1124,9 +1124,17 @@ function pt() {
   const pc={high:['var(--rds)','var(--rd)'],medium:['var(--ams)','var(--am)'],low:['var(--gns)','var(--gn)']};
   el.innerHTML = l.map(t=>{
     const [bg,fg]=pc[t.priority]||pc.medium;
+    const assignBadge = t.assigned_to ? `<span class="chip cp" style="font-size:9px;padding:2px 7px">${t.assigned_to}</span>` : '';
+    const dueBadge = t.due_date ? `<span class="chip cd" style="font-size:9px;padding:2px 7px">Due ${t.due_date}</span>` : '';
     return `<div class="trow ${t.priority}">
       <div class="chk ${t.done?'on':''}" onclick="toggleTask('${t.id}',${!t.done})"></div>
-      <div class="tinfo"><div class="tname ${t.done?'done':''}">${t.name}</div><div class="tsub">${[t.category,t.notes].filter(Boolean).join(' · ')||'No details'}</div></div>
+      <div class="tinfo">
+        <div class="tname ${t.done?'done':''}">${t.name}</div>
+        <div class="tsub" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px">
+          ${[t.category,t.notes].filter(Boolean).map(x=>`<span>${x}</span>`).join('<span style="color:var(--t3)">·</span>') || ''}
+          ${assignBadge}${dueBadge}
+        </div>
+      </div>
       <span class="ppill" style="background:${bg};color:${fg}">${t.priority}</span>
       <button class="dbtn" onclick="deleteTask('${t.id}')" style="opacity:.5">✕</button>
     </div>`;}).join('');
@@ -1136,13 +1144,20 @@ function otm() {
     <div class="fg"><label class="flbl2">Task Name</label><input type="text" id="t-nm" placeholder="What needs to get done?"></div>
     <div class="fr2"><div class="fg" style="margin:0"><label class="flbl2">Priority</label><select id="t-pr"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select></div>
     <div class="fg" style="margin:0"><label class="flbl2">Category</label><input type="text" id="t-ca" placeholder="Training, Admin..."></div></div>
+    <div class="fr2" style="margin-top:14px">
+      <div class="fg" style="margin:0"><label class="flbl2">Assign To</label>
+        <select id="t-assign"><option value="">— Unassigned —</option>${members.map(m=>`<option value="${m.name}">${m.name}</option>`).join('')}</select>
+      </div>
+      <div class="fg" style="margin:0"><label class="flbl2">Due Date</label><input type="date" id="t-due"></div>
+    </div>
     <div class="fg" style="margin-top:14px"><label class="flbl2">Notes</label><textarea id="t-no" placeholder="Details..." style="min-height:70px"></textarea></div>
     <div class="mac"><button class="btn btn-ghost" onclick="cm()">Cancel</button><button class="btn btn-primary" onclick="saveTask()">Add Task</button></div>`;
   om();
 }
 async function saveTask() {
   const name=document.getElementById('t-nm').value.trim(); if(!name)return;
-  const {data,error}=await sb.from('tasks').insert({workspace_id:workspace.id,name,priority:document.getElementById('t-pr').value,category:document.getElementById('t-ca').value.trim(),notes:document.getElementById('t-no').value.trim(),done:false}).select().single();
+  const assignEl=document.getElementById('t-assign'),dueEl=document.getElementById('t-due');
+  const {data,error}=await sb.from('tasks').insert({workspace_id:workspace.id,name,priority:document.getElementById('t-pr').value,category:document.getElementById('t-ca').value.trim(),notes:document.getElementById('t-no').value.trim(),assigned_to:assignEl?.value||null,due_date:dueEl?.value||null,done:false}).select().single();
   if(error){showToast('Error saving task',true);return;}
   tasks.push(data);refreshBadges();cm();rnd();
 }
@@ -1601,15 +1616,29 @@ function rMyGL(c) {
 }
 
 function rMyTK(c) {
-  const l = tasks.filter(t=>!t.done);
+  const m = currentEmployee;
+  const allPending = tasks.filter(t=>!t.done);
+  const myTasks = allPending.filter(t=>t.assigned_to===m.name);
+  const teamTasks = allPending.filter(t=>!t.assigned_to||t.assigned_to!==m.name);
   const pc={high:['var(--rds)','var(--rd)'],medium:['var(--ams)','var(--am)'],low:['var(--gns)','var(--gn)']};
+  const taskRow = (t,mine=false) => {
+    const[bg,fg]=pc[t.priority]||pc.medium;
+    const dueBadge = t.due_date?`<span class="chip cd" style="font-size:9px;padding:2px 7px">Due ${t.due_date}</span>`:'';
+    return `<div class="trow ${t.priority}" style="${mine?'border-color:rgba(108,99,255,.35);background:rgba(108,99,255,.06)':''}">
+      <div class="chk ro ${t.done?'on':''}"></div>
+      <div class="tinfo">
+        <div class="tname">${t.name}${mine?'<span style="font-size:9px;font-weight:700;background:var(--pus);color:#a89fff;padding:2px 7px;border-radius:5px;margin-left:8px">ASSIGNED TO YOU</span>':''}</div>
+        <div class="tsub" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${[t.category,t.notes].filter(Boolean).join(' · ')||''}${dueBadge}</div>
+      </div>
+      <span class="ppill" style="background:${bg};color:${fg}">${t.priority}</span>
+    </div>`;
+  };
   c.innerHTML = `<div class="info-pill">ℹ Team tasks to tackle in slow periods</div>
-    <div class="tlist">${l.length===0?'<div class="empty" style="padding:48px"><div class="eico">◷</div>No pending tasks</div>':
-      l.map(t=>{const[bg,fg]=pc[t.priority]||pc.medium;return`<div class="trow ${t.priority}">
-        <div class="chk ro"></div>
-        <div class="tinfo"><div class="tname">${t.name}</div><div class="tsub">${[t.category,t.notes].filter(Boolean).join(' · ')||'No details'}</div></div>
-        <span class="ppill" style="background:${bg};color:${fg}">${t.priority}</span>
-      </div>`;}).join('')}</div>`;
+    ${myTasks.length?`<div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--pu);margin-bottom:10px">Assigned to you (${myTasks.length})</div>
+    <div class="tlist" style="margin-bottom:20px">${myTasks.map(t=>taskRow(t,true)).join('')}</div>`:''}
+    ${teamTasks.length?`<div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Team Tasks (${teamTasks.length})</div>
+    <div class="tlist">${teamTasks.map(t=>taskRow(t,false)).join('')}</div>`:''}
+    ${allPending.length===0?'<div class="empty" style="padding:48px"><div class="eico">◷</div>No pending tasks</div>':''}`;
 }
 
 async function rMySS(c) {
