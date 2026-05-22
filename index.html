@@ -300,6 +300,21 @@ select option{background:#0d1120}
 .note-rendered td{padding:5px 8px;border:1px solid var(--b1);color:var(--t2)}
 .note-rendered blockquote{border-left:3px solid var(--pu);padding-left:10px;color:var(--t2);font-style:italic;margin:6px 0;font-size:12px}
 
+
+/* ── COLLAPSIBLE NOTES ── */
+.note-item{background:var(--s1);border:1px solid var(--b1);border-radius:12px;margin-bottom:8px;overflow:hidden;transition:border-color .2s;animation:fsIn .25s ease}
+.note-item:hover{border-color:var(--b2)}
+.note-item.open{border-color:rgba(108,99,255,.3);background:rgba(108,99,255,.04)}
+.note-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
+.note-header:hover{background:rgba(255,255,255,.03)}
+.note-chevron{font-size:11px;color:var(--t3);transition:transform .2s;flex-shrink:0;margin-left:auto}
+.note-item.open .note-chevron{transform:rotate(180deg)}
+.note-preview{font-size:11px;font-weight:500;color:var(--t3);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.note-body{display:none;padding:0 14px 14px;border-top:1px solid var(--b1);margin-top:0}
+.note-item.open .note-body{display:block}
+.note-body-inner{padding-top:14px}
+.note-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
@@ -1324,12 +1339,28 @@ async function openMemberPanel(memberId){
 
 function renderNotes(notes){
   if(!notes.length) return `<div class="empty">No notes yet</div>`;
-  return notes.map(n=>{
+  return notes.map((n,idx)=>{
     const[bg,fg,lb]=TM[n.note_type]||TM.other;
-    return `<div class="ncard"><span class="ntype" style="background:${bg};color:${fg}">${lb}</span>
-      <span class="ndate">${new Date(n.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
-      <div class="ntxt">${n.note_text}</div></div>`;
+    const isHTML=n.note_text&&n.note_text.includes('<')&&n.note_text.includes('>');
+    const noteContent=isHTML?`<div class="note-rendered">${n.note_text}</div>`:`<div class="ntxt">${n.note_text}</div>`;
+    const tmp=document.createElement('div');tmp.innerHTML=n.note_text||'';
+    const preview=(tmp.textContent||tmp.innerText||'No content').trim().slice(0,90);
+    const date=new Date(n.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    return `<div class="note-item" id="note-${idx}">
+      <div class="note-header" onclick="toggleNote('note-${idx}')">
+        <span class="ntype" style="background:${bg};color:${fg};margin-bottom:0">${lb}</span>
+        <span style="font-size:10px;font-weight:600;color:var(--t3);flex-shrink:0">${date}</span>
+        <span class="note-preview">${preview}</span>
+        <span class="note-chevron">▼</span>
+      </div>
+      <div class="note-body"><div class="note-body-inner">${noteContent}</div></div>
+    </div>`;
   }).join('');
+}
+
+function toggleNote(id){
+  const el=document.getElementById(id);
+  if(el) el.classList.toggle('open');
 }
 
 async function saveNote(memberId){
@@ -1622,11 +1653,23 @@ async function rMyCH(c) {
   const ns = notes||[];
   c.innerHTML = `<div class="info-pill">ℹ Coaching notes are added by your manager</div>
     ${ns.length===0?'<div class="empty" style="padding:60px"><div class="eico" style="font-size:40px">◉</div>No coaching notes yet</div>':
-      ns.map(n=>{const[bg,fg,lb]=TM[n.note_type]||TM.other;return`<div class="ncard" style="margin-bottom:12px">
-        <span class="ntype" style="background:${bg};color:${fg}">${lb}</span>
-        <span class="ndate">${new Date(n.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
-        <div class="ntxt">${n.note_text}</div>
-      </div>`;}).join('')}`;
+      ns.map((n,idx)=>{
+        const[bg,fg,lb]=TM[n.note_type]||TM.other;
+        const isHTML=n.note_text&&n.note_text.includes('<')&&n.note_text.includes('>');
+        const noteContent=isHTML?'<div class="note-rendered">'+n.note_text+'</div>':'<div class="ntxt">'+n.note_text+'</div>';
+        const tmp=document.createElement('div');tmp.innerHTML=n.note_text||'';
+        const preview=(tmp.textContent||tmp.innerText||'No content').trim().slice(0,90);
+        const date=new Date(n.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        return '<div class="note-item" id="empn-'+idx+'">'+
+          '<div class="note-header" onclick="toggleNote(&quot;empn-'+idx+'&quot;)">'+
+            '<span class="ntype" style="background:'+bg+';color:'+fg+';margin-bottom:0">'+lb+'</span>'+
+            '<span style="font-size:10px;font-weight:600;color:var(--t3);flex-shrink:0">'+date+'</span>'+
+            '<span class="note-preview">'+preview+'</span>'+
+            '<span class="note-chevron">▼</span>'+
+          '</div>'+
+          '<div class="note-body"><div class="note-body-inner">'+noteContent+'</div></div>'+
+        '</div>';
+      }).join('')}`;
 }
 
 function rMyJB(c) {
