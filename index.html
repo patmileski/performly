@@ -1617,28 +1617,82 @@ function rMyGL(c) {
 
 function rMyTK(c) {
   const m = currentEmployee;
-  const allPending = tasks.filter(t=>!t.done);
-  const myTasks = allPending.filter(t=>t.assigned_to===m.name);
-  const teamTasks = allPending.filter(t=>!t.assigned_to||t.assigned_to!==m.name);
+  const myTasks = tasks.filter(t=>t.assigned_to===m.name);
   const pc={high:['var(--rds)','var(--rd)'],medium:['var(--ams)','var(--am)'],low:['var(--gns)','var(--gn)']};
-  const taskRow = (t,mine=false) => {
-    const[bg,fg]=pc[t.priority]||pc.medium;
-    const dueBadge = t.due_date?`<span class="chip cd" style="font-size:9px;padding:2px 7px">Due ${t.due_date}</span>`:'';
-    return `<div class="trow ${t.priority}" style="${mine?'border-color:rgba(108,99,255,.35);background:rgba(108,99,255,.06)':''}">
-      <div class="chk ro ${t.done?'on':''}"></div>
-      <div class="tinfo">
-        <div class="tname">${t.name}${mine?'<span style="font-size:9px;font-weight:700;background:var(--pus);color:#a89fff;padding:2px 7px;border-radius:5px;margin-left:8px">ASSIGNED TO YOU</span>':''}</div>
-        <div class="tsub" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${[t.category,t.notes].filter(Boolean).join(' · ')||''}${dueBadge}</div>
-      </div>
-      <span class="ppill" style="background:${bg};color:${fg}">${t.priority}</span>
+
+  if(!myTasks.length){
+    c.innerHTML=`<div class="info-pill">ℹ Only tasks assigned to you appear here</div>
+      <div class="empty" style="padding:60px"><div class="eico" style="font-size:44px">◷</div>No tasks assigned to you yet</div>`;
+    return;
+  }
+
+  const done = myTasks.filter(t=>t.done).length;
+  const pct = Math.round(done/myTasks.length*100);
+
+  c.innerHTML=`
+    <div class="info-pill">ℹ Only your assigned tasks are shown here</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3)">${done} of ${myTasks.length} complete</span>
+      <span style="font-size:12px;font-weight:700;color:var(--pu)">${pct}%</span>
+    </div>
+    <div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:20px">
+      <div style="height:100%;width:${pct}%;background:var(--pu);border-radius:2px;transition:width .5s ease"></div>
+    </div>
+    <div class="tlist" id="my-task-list">
+      ${myTasks.map(t=>{
+        const[bg,fg]=pc[t.priority]||pc.medium;
+        const dueBadge=t.due_date?`<span class="chip cd" style="font-size:9px;padding:2px 6px">Due ${t.due_date}</span>`:'';
+        const catBadge=t.category?`<span class="chip cd" style="font-size:9px;padding:2px 6px">${t.category}</span>`:'';
+        return `<div class="trow ${t.priority}" style="${t.done?'opacity:.6':''}">
+          <div class="chk ${t.done?'on':''}" onclick="empToggleTask('${t.id}',${!t.done})"></div>
+          <div class="tinfo" style="cursor:pointer" onclick="openTaskNote('${t.id}')">
+            <div class="tname ${t.done?'done':''}">${t.name}</div>
+            <div class="tsub" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+              ${catBadge}${dueBadge}
+              ${t.notes?`<span style="font-size:11px;color:var(--t3)">${t.notes}</span>`:''}
+            </div>
+            ${t.emp_note?`<div style="margin-top:8px;padding:8px 10px;background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.2);border-radius:7px;font-size:11px;font-weight:500;color:var(--t2)">📝 ${t.emp_note}</div>`:''}
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+            <span class="ppill" style="background:${bg};color:${fg}">${t.priority}</span>
+            <button class="btn btn-ghost btn-xs" onclick="openTaskNote('${t.id}')" style="font-size:10px">📝 Note</button>
+          </div>
+        </div>`;
+      }).join('')}
     </div>`;
-  };
-  c.innerHTML = `<div class="info-pill">ℹ Team tasks to tackle in slow periods</div>
-    ${myTasks.length?`<div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--pu);margin-bottom:10px">Assigned to you (${myTasks.length})</div>
-    <div class="tlist" style="margin-bottom:20px">${myTasks.map(t=>taskRow(t,true)).join('')}</div>`:''}
-    ${teamTasks.length?`<div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Team Tasks (${teamTasks.length})</div>
-    <div class="tlist">${teamTasks.map(t=>taskRow(t,false)).join('')}</div>`:''}
-    ${allPending.length===0?'<div class="empty" style="padding:48px"><div class="eico">◷</div>No pending tasks</div>':''}`;
+}
+
+async function empToggleTask(id, done) {
+  await sb.from('tasks').update({done}).eq('id',id);
+  const t = tasks.find(x=>x.id===id); if(t) t.done=done;
+  rMyTK(document.getElementById('content'));
+}
+
+function openTaskNote(taskId) {
+  const t = tasks.find(x=>x.id===taskId); if(!t) return;
+  document.getElementById('modal-body').innerHTML=`
+    <div class="mttl">Task Note</div>
+    <div style="background:rgba(255,255,255,.03);border:1px solid var(--b1);border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px">${t.name}</div>
+      ${t.notes?`<div style="font-size:12px;color:var(--t2)">${t.notes}</div>`:''}
+    </div>
+    <div class="fg"><label class="flbl2">Your Note / Update</label>
+      <textarea id="emp-task-note" placeholder="Add a progress update, question, or note..." style="min-height:100px">${t.emp_note||''}</textarea>
+    </div>
+    <div class="mac">
+      <button class="btn btn-ghost" onclick="cm()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTaskNote('${taskId}')">Save Note</button>
+    </div>`;
+  om();
+}
+
+async function saveTaskNote(taskId) {
+  const note = document.getElementById('emp-task-note').value.trim();
+  await sb.from('tasks').update({emp_note: note}).eq('id', taskId);
+  const t = tasks.find(x=>x.id===taskId); if(t) t.emp_note=note;
+  cm();
+  rMyTK(document.getElementById('content'));
+  showToast('Note saved!');
 }
 
 async function rMySS(c) {
