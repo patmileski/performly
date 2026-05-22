@@ -262,6 +262,44 @@ select option{background:#0d1120}
 
 .sb-role-badge.emp{background:var(--pus);color:#a89fff;border-color:rgba(108,99,255,.2)}
 .emp-profile{background:linear-gradient(135deg,rgba(108,99,255,.15),rgba(108,99,255,.04));border:1px solid rgba(108,99,255,.2);border-radius:20px;padding:28px;margin-bottom:24px;display:flex;align-items:center;gap:22px}
+
+/* ── RICH TEXT EDITOR ── */
+.rte-wrap{background:rgba(255,255,255,.04);border:1px solid var(--b1);border-radius:10px;overflow:hidden;transition:border-color .2s}
+.rte-wrap:focus-within{border-color:var(--pu);background:rgba(108,99,255,.07)}
+.rte-toolbar{display:flex;gap:2px;padding:8px 10px;border-bottom:1px solid var(--b1);flex-wrap:wrap;background:rgba(255,255,255,.03)}
+.rte-btn{background:none;border:1px solid transparent;color:var(--t2);font-family:var(--font);font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;cursor:pointer;transition:all .15s;min-width:28px;text-align:center}
+.rte-btn:hover{background:var(--s2);color:var(--t1);border-color:var(--b1)}
+.rte-btn.active{background:var(--pus);color:#a89fff;border-color:rgba(108,99,255,.3)}
+.rte-sep{width:1px;background:var(--b1);margin:2px 4px;align-self:stretch}
+.rte-editor{min-height:160px;max-height:400px;overflow-y:auto;padding:14px;outline:none;font-family:var(--font);font-size:13px;font-weight:500;color:var(--t1);line-height:1.7}
+.rte-editor:empty::before{content:attr(data-placeholder);color:var(--t3);pointer-events:none}
+.rte-editor h1{font-size:18px;font-weight:800;letter-spacing:-.3px;margin-bottom:8px;margin-top:12px;color:var(--t1)}
+.rte-editor h2{font-size:15px;font-weight:700;margin-bottom:6px;margin-top:10px;color:var(--t1)}
+.rte-editor h3{font-size:13px;font-weight:700;margin-bottom:4px;margin-top:8px;color:var(--t2)}
+.rte-editor p{margin-bottom:6px}
+.rte-editor ul,.rte-editor ol{padding-left:20px;margin-bottom:8px}
+.rte-editor li{margin-bottom:3px}
+.rte-editor strong{font-weight:800;color:var(--t1)}
+.rte-editor em{font-style:italic;color:var(--t2)}
+.rte-editor table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+.rte-editor th{background:rgba(108,99,255,.15);color:#a89fff;font-weight:700;padding:8px 10px;border:1px solid var(--b2);text-align:left}
+.rte-editor td{padding:7px 10px;border:1px solid var(--b1);color:var(--t2)}
+.rte-editor tr:hover td{background:rgba(255,255,255,.03)}
+.rte-editor blockquote{border-left:3px solid var(--pu);padding-left:12px;color:var(--t2);font-style:italic;margin:8px 0}
+.rte-editor hr{border:none;border-top:1px solid var(--b1);margin:12px 0}
+.rte-editor a{color:var(--bl);text-decoration:underline}
+.note-rendered h1{font-size:16px;font-weight:800;margin:10px 0 6px;color:var(--t1)}
+.note-rendered h2{font-size:14px;font-weight:700;margin:8px 0 4px;color:var(--t1)}
+.note-rendered h3{font-size:12px;font-weight:700;margin:6px 0 3px;color:var(--t2)}
+.note-rendered p{margin-bottom:5px;font-size:12px;line-height:1.65}
+.note-rendered ul,.note-rendered ol{padding-left:18px;margin-bottom:6px;font-size:12px}
+.note-rendered li{margin-bottom:2px}
+.note-rendered strong{font-weight:800}
+.note-rendered table{width:100%;border-collapse:collapse;margin:8px 0;font-size:11px}
+.note-rendered th{background:rgba(108,99,255,.15);color:#a89fff;font-weight:700;padding:6px 8px;border:1px solid var(--b2);text-align:left}
+.note-rendered td{padding:5px 8px;border:1px solid var(--b1);color:var(--t2)}
+.note-rendered blockquote{border-left:3px solid var(--pu);padding-left:10px;color:var(--t2);font-style:italic;margin:6px 0;font-size:12px}
+
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
@@ -425,6 +463,36 @@ select option{background:#0d1120}
 // ══════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://nhzjuuqupmyftlwsirqt.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oemp1dXF1cG15ZnRsd3NpcnF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNzEzNTEsImV4cCI6MjA5MzY0NzM1MX0.1SOI0Q4OvnJVEvIhOTRhBCqMrgr9ron9eLUVdBOEbMQ';
+
+// ── RICH TEXT EDITOR HELPERS ──────────────────────────
+function rte(cmd, val=null) {
+  document.getElementById('ntxt')?.focus();
+  document.execCommand(cmd, false, val);
+}
+
+function insertTable() {
+  const rows = prompt('Number of rows (including header):', '3');
+  const cols = prompt('Number of columns:', '3');
+  if (!rows || !cols) return;
+  const r = parseInt(rows), c = parseInt(cols);
+  let html = '<table><thead><tr>';
+  for (let i=0; i<c; i++) html += `<th>Header ${i+1}</th>`;
+  html += '</tr></thead><tbody>';
+  for (let i=1; i<r; i++) {
+    html += '<tr>';
+    for (let j=0; j<c; j++) html += '<td>Cell</td>';
+    html += '</tr>';
+  }
+  html += '</tbody></table><p><br></p>';
+  document.getElementById('ntxt')?.focus();
+  document.execCommand('insertHTML', false, html);
+}
+
+function clearEditor() {
+  const el = document.getElementById('ntxt');
+  if (el && confirm('Clear all content?')) el.innerHTML = '';
+}
+
 // ── DIRECT SUPABASE API (no library) ──────────────────
 const sb = {
   _url: SUPABASE_URL,
@@ -1221,8 +1289,31 @@ async function openMemberPanel(memberId){
         <option value="development">Development Plan</option><option value="other">Other</option>
       </select>
     </div>
-    <div class="fg"><label class="flbl2">Notes</label><textarea id="ntxt" placeholder="Discussion points, action items..."></textarea></div>
-    <button class="btn btn-primary btn-sm" onclick="saveNote('${memberId}')">+ Add Note</button>
+    <div class="fg"><label class="flbl2">Notes</label>
+      <div class="rte-wrap">
+        <div class="rte-toolbar">
+          <button class="rte-btn" onclick="rte('bold')" title="Bold"><b>B</b></button>
+          <button class="rte-btn" onclick="rte('italic')" title="Italic"><i>I</i></button>
+          <button class="rte-btn" onclick="rte('underline')" title="Underline"><u>U</u></button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="rte('formatBlock','h1')" title="Heading 1">H1</button>
+          <button class="rte-btn" onclick="rte('formatBlock','h2')" title="Heading 2">H2</button>
+          <button class="rte-btn" onclick="rte('formatBlock','h3')" title="Heading 3">H3</button>
+          <button class="rte-btn" onclick="rte('formatBlock','p')" title="Paragraph">P</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="rte('insertUnorderedList')" title="Bullet list">• List</button>
+          <button class="rte-btn" onclick="rte('insertOrderedList')" title="Numbered list">1. List</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="insertTable()" title="Insert table">⊞ Table</button>
+          <button class="rte-btn" onclick="rte('formatBlock','blockquote')" title="Quote">❝</button>
+          <button class="rte-btn" onclick="rte('insertHorizontalRule')" title="Divider">—</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="clearEditor()" title="Clear" style="color:var(--rd)">✕</button>
+        </div>
+        <div class="rte-editor" id="ntxt" contenteditable="true" data-placeholder="Discussion points, action items, key takeaways..."></div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="saveNote('${memberId}')" style="margin-top:10px">+ Add Note</button>
     <div class="divider"></div>
     <div class="sslbl">Coaching History</div>
     <div id="nhist">${renderNotes(notes||[])}</div>`;
@@ -1242,10 +1333,12 @@ function renderNotes(notes){
 }
 
 async function saveNote(memberId){
-  const text=document.getElementById('ntxt').value.trim();if(!text)return;
+  const el=document.getElementById('ntxt');
+  const text=(el.tagName==='TEXTAREA'?el.value:el.innerHTML).trim();
+  if(!text||text==='<br>'||text==='<p><br></p>')return;
   const{data,error}=await sb.from('coaching_notes').insert({workspace_id:workspace.id,member_id:memberId,note_type:document.getElementById('ntype').value,note_text:text}).select().single();
   if(error){showToast('Error saving note',true);return;}
-  document.getElementById('ntxt').value='';
+  if(el.tagName==='TEXTAREA') el.value=''; else el.innerHTML='';
   // Reload notes
   const{data:notes}=await sb.from('coaching_notes').select('*').eq('member_id',memberId).order('created_at',{ascending:false});
   document.getElementById('nhist').innerHTML=renderNotes(notes||[]);
