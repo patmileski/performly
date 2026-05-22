@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Performly</title>
+<title>CoachOps360</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
+<!-- Supabase via direct fetch - no library needed -->
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -273,7 +273,7 @@ select option{background:#0d1120}
 <!-- LOADING -->
 <div id="loading-screen" class="screen">
   <div class="spinner"></div>
-  <div class="loading-text">Loading Performly...</div>
+  <div class="loading-text">Loading CoachOps360...</div>
 </div>
 
 <!-- AUTH -->
@@ -281,8 +281,8 @@ select option{background:#0d1120}
   <div class="auth-wrap">
     <div class="auth-logo">
       <div class="auth-icon">⬡</div>
-      <div class="auth-title">Performly</div>
-      <div class="auth-sub">Performance &amp; Coaching Hub</div>
+      <div class="auth-title">CoachOps360</div>
+      <div class="auth-sub">Coaching &amp; Performance Platform</div>
     </div>
 
     <!-- Role selector -->
@@ -368,7 +368,7 @@ select option{background:#0d1120}
       <div class="sb-logo">
         <div class="sb-icon">⬡</div>
         <div>
-          <div class="sb-name">Performly</div>
+          <div class="sb-name">CoachOps360</div>
           <div class="sb-role-badge mgr" id="sb-badge">Manager</div>
         </div>
       </div>
@@ -425,26 +425,151 @@ select option{background:#0d1120}
 // ══════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://nhzjuuqupmyftlwsirqt.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oemp1dXF1cG15ZnRsd3NpcnF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNzEzNTEsImV4cCI6MjA5MzY0NzM1MX0.1SOI0Q4OvnJVEvIhOTRhBCqMrgr9ron9eLUVdBOEbMQ';
-// Robust Supabase init
-let sb;
-try {
-  if (typeof supabase === 'undefined') throw new Error('supabase global not found');
-  if (typeof supabase.createClient !== 'function') throw new Error('createClient not a function');
-  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: false
+// ── DIRECT SUPABASE API (no library) ──────────────────
+const sb = {
+  _url: SUPABASE_URL,
+  _key: SUPABASE_KEY,
+  _session: null,
+
+  _headers(extra={}) {
+    const h = { 'Content-Type':'application/json', 'apikey': this._key };
+    if (this._session?.access_token) h['Authorization'] = 'Bearer ' + this._session.access_token;
+    else h['Authorization'] = 'Bearer ' + this._key;
+    return { ...h, ...extra };
+  },
+
+  auth: {
+    async signUp({ email, password }) {
+      try {
+        const r = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await r.json();
+        console.log('signUp response:', r.status, JSON.stringify(data).slice(0,200));
+        if (!r.ok) return { data: {}, error: { message: data.message || data.error_description || JSON.stringify(data), status: r.status } };
+        sb._session = data.session || null;
+        return { data: { user: data.user || data }, error: null };
+      } catch(e) { return { data: {}, error: { message: e.message } }; }
     },
-    global: {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+
+    async signInWithPassword({ email, password }) {
+      try {
+        const r = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await r.json();
+        console.log('signIn response:', r.status, JSON.stringify(data).slice(0,200));
+        if (!r.ok) return { data: {}, error: { message: data.error_description || data.message || JSON.stringify(data), status: r.status } };
+        sb._session = data;
+        return { data: { user: data.user, session: data }, error: null };
+      } catch(e) { return { data: {}, error: { message: e.message } }; }
+    },
+
+    async getSession() {
+      // Check localStorage for saved session
+      try {
+        const saved = localStorage.getItem('sb_session');
+        if (saved) {
+          const session = JSON.parse(saved);
+          // Check if expired
+          if (session.expires_at && session.expires_at * 1000 > Date.now()) {
+            sb._session = session;
+            return { data: { session }, error: null };
+          }
+        }
+      } catch(e) {}
+      return { data: { session: null }, error: null };
+    },
+
+    async signOut() {
+      localStorage.removeItem('sb_session');
+      sb._session = null;
+      return { error: null };
+    },
+
+    onAuthStateChange(callback) {
+      // Simple implementation - check on init
+      return { data: { subscription: { unsubscribe: ()=>{} } } };
     }
-  });
-  console.log('Supabase client initialized OK');
-} catch(e) {
-  console.error('Supabase init failed:', e);
-  document.getElementById('loading-screen').querySelector('.loading-text').textContent = 'Error loading app: ' + e.message;
+  },
+
+  from(table) {
+    return new SbQuery(this, table);
+  }
+};
+
+// Save session to localStorage when set
+const _origSignIn = sb.auth.signInWithPassword.bind(sb.auth);
+sb.auth.signInWithPassword = async function(creds) {
+  const result = await _origSignIn(creds);
+  if (result.data?.session) {
+    localStorage.setItem('sb_session', JSON.stringify(result.data.session));
+  }
+  return result;
+};
+
+class SbQuery {
+  constructor(client, table) {
+    this._client = client;
+    this._table = table;
+    this._filters = [];
+    this._selectCols = '*';
+    this._orderCol = null;
+    this._orderAsc = true;
+    this._single = false;
+    this._insertData = null;
+    this._updateData = null;
+    this._deleteMode = false;
+  }
+
+  select(cols='*') { this._selectCols = cols; return this; }
+  eq(col, val) { this._filters.push(`${col}=eq.${val}`); return this; }
+  order(col, opts={}) { this._orderCol = col; this._orderAsc = opts.ascending !== false; return this; }
+  single() { this._single = true; return this; }
+
+  insert(data) { this._insertData = data; return this; }
+  update(data) { this._updateData = data; return this; }
+  delete() { this._deleteMode = true; return this; }
+
+  async _execute() {
+    const base = SUPABASE_URL + '/rest/v1/' + this._table;
+    const params = new URLSearchParams();
+    this._filters.forEach(f => { const [k,v] = f.split('=eq.'); params.set(k, 'eq.' + v); });
+    if (this._orderCol) params.set('order', this._orderCol + (this._orderAsc?'.asc':'.desc'));
+    if (!this._insertData && !this._updateData && !this._deleteMode) params.set('select', this._selectCols);
+    const url = base + (params.toString() ? '?' + params.toString() : '');
+    const headers = this._client._headers();
+    if (this._single) headers['Accept'] = 'application/vnd.pgrst.object+json';
+    if (this._insertData) headers['Prefer'] = 'return=representation';
+    if (this._updateData) headers['Prefer'] = 'return=representation';
+
+    let method = 'GET', body;
+    if (this._insertData) { method = 'POST'; body = JSON.stringify(this._insertData); }
+    else if (this._updateData) { method = 'PATCH'; body = JSON.stringify(this._updateData); }
+    else if (this._deleteMode) { method = 'DELETE'; }
+
+    try {
+      const r = await fetch(url, { method, headers, body });
+      if (r.status === 204) return { data: this._single ? {} : [], error: null };
+      const data = await r.json();
+      if (!r.ok) {
+        console.error('DB error:', this._table, r.status, JSON.stringify(data).slice(0,200));
+        return { data: null, error: { message: data.message || data.hint || JSON.stringify(data), code: data.code } };
+      }
+      return { data: this._single ? (Array.isArray(data)?data[0]:data) : data, error: null };
+    } catch(e) {
+      return { data: null, error: { message: e.message } };
+    }
+  }
+
+  then(resolve, reject) { return this._execute().then(resolve, reject); }
 }
+
+console.log('Supabase direct client initialized OK');
 
 // ══════════════════════════════════════════════════════
 // STATE
@@ -1447,17 +1572,7 @@ async function boot(){
   }
 }
 
-sb.auth.onAuthStateChange(async(event, session)=>{
-  if(event==='SIGNED_IN' && session && !workspace){
-    currentUser = session.user;
-    workspace = null;
-    await loadWorkspace();
-  } else if(event==='SIGNED_OUT'){
-    currentUser=null; workspace=null;
-    members=[];goals=[];tasks=[];sessions=[];jobs=[];
-    showScreen('auth-screen');
-  }
-});
+// Auth state handled by boot() and direct calls - no listener needed in direct fetch mode
 
 boot();
 </script>
