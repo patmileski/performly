@@ -1670,14 +1670,21 @@ async function empToggleTask(id, done) {
 
 function openTaskNote(taskId) {
   const t = tasks.find(x=>x.id===taskId); if(!t) return;
+  const pc={high:['var(--rds)','var(--rd)'],medium:['var(--ams)','var(--am)'],low:['var(--gns)','var(--gn)']};
+  const[bg,fg]=pc[t.priority]||pc.medium;
   document.getElementById('modal-body').innerHTML=`
-    <div class="mttl">Task Note</div>
-    <div style="background:rgba(255,255,255,.03);border:1px solid var(--b1);border-radius:10px;padding:14px;margin-bottom:16px">
-      <div style="font-size:14px;font-weight:700;margin-bottom:4px">${t.name}</div>
-      ${t.notes?`<div style="font-size:12px;color:var(--t2)">${t.notes}</div>`:''}
+    <div class="mttl">📝 Task Note</div>
+    <div style="background:rgba(255,255,255,.03);border:1px solid var(--b1);border-radius:12px;padding:16px;margin-bottom:18px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span class="ppill" style="background:${bg};color:${fg};font-size:9px;padding:2px 9px">${t.priority}</span>
+        ${t.category?`<span class="chip cd" style="font-size:9px;padding:2px 8px">${t.category}</span>`:''}
+        ${t.due_date?`<span class="chip cd" style="font-size:9px;padding:2px 8px">Due ${t.due_date}</span>`:''}
+      </div>
+      <div style="font-size:15px;font-weight:800;letter-spacing:-.3px;margin-bottom:8px">${t.name}</div>
+      ${t.notes?`<div style="font-size:12px;font-weight:500;color:var(--t2);line-height:1.6;padding:10px 12px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid var(--b1);word-break:break-word">${t.notes}</div>`:''}
     </div>
-    <div class="fg"><label class="flbl2">Your Note / Update</label>
-      <textarea id="emp-task-note" placeholder="Add a progress update, question, or note..." style="min-height:100px">${t.emp_note||''}</textarea>
+    <div class="fg"><label class="flbl2">Your Note / Progress Update</label>
+      <textarea id="emp-task-note" placeholder="Add a progress update, question, or blockers..." style="min-height:110px">${t.emp_note||''}</textarea>
     </div>
     <div class="mac">
       <button class="btn btn-ghost" onclick="cm()">Cancel</button>
