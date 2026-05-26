@@ -315,6 +315,29 @@ select option{background:#0d1120}
 .note-body-inner{padding-top:14px}
 .note-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 
+
+/* ── KEY RESULTS ── */
+.goal-expand-btn{background:none;border:none;color:var(--t3);cursor:pointer;font-size:10px;font-weight:700;padding:0;transition:color .15s;letter-spacing:.5px;text-transform:uppercase;margin-top:4px;display:inline-flex;align-items:center;gap:4px}
+.goal-expand-btn:hover{color:var(--pu)}
+.kr-section{margin-top:8px;padding-top:8px;border-top:1px dashed var(--b1);animation:fsIn .2s ease}
+.kr-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.kr-item:last-child{border-bottom:none}
+.kr-chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--b2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.kr-chk:hover{border-color:var(--gn)}
+.kr-chk.on{background:var(--gn);border-color:var(--gn)}
+.kr-chk.on::after{content:'✓';font-size:9px;font-weight:800;color:#07090f}
+.kr-chk.ro{cursor:default;pointer-events:none}
+.kr-text{font-size:11px;font-weight:500;color:var(--t2);flex:1;line-height:1.4}
+.kr-text.done{text-decoration:line-through;color:var(--t3)}
+.kr-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px;opacity:0;transition:opacity .15s;padding:0 2px}
+.kr-item:hover .kr-del{opacity:1}
+.kr-del:hover{color:var(--rd)}
+.kr-add-row{display:flex;gap:6px;margin-top:8px}
+.kr-input{flex:1;padding:6px 10px;font-size:11px;border-radius:7px;min-height:unset}
+.kr-pbar{height:2px;background:rgba(255,255,255,.07);border-radius:1px;overflow:hidden;margin-top:6px}
+.kr-pfill{height:100%;border-radius:1px;transition:width .4s ease}
+.goal-kr-summary{font-size:10px;font-weight:600;color:var(--t3);margin-top:3px}
+
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
@@ -993,12 +1016,12 @@ function rOV(c) {
 
   const pb = (p) => {
     const g = goals.filter(x=>x.period===p);
-    const d = g.filter(x=>x.done).length, pct = g.length?Math.round(d/g.length*100):0;
+    const pct = g.length ? Math.round(g.reduce((sum,x)=>sum+krPct(x),0)/g.length) : 0;
     const col = {weekly:'var(--pu)',monthly:'var(--bl)',annual:'var(--gn)'}[p];
     return `<div style="margin-bottom:18px">
       <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--t3);margin-bottom:6px">
         <span style="color:var(--t2);text-transform:capitalize;font-weight:700">${p}</span>
-        <span style="color:${col}">${d}/${g.length} · ${pct}%</span>
+        <span style="color:${col}">${g.length} goals · ${pct}%</span>
       </div>
       <div class="pbar"><div class="pbfill" style="width:${pct}%;background:${col}"></div></div>
     </div>`;
@@ -1042,28 +1065,118 @@ function rOV(c) {
 // ══════════════════════════════════════════════════════
 // GOALS
 // ══════════════════════════════════════════════════════
+function getKRs(goal) {
+  try { return Array.isArray(goal.key_results) ? goal.key_results : (goal.key_results ? JSON.parse(goal.key_results) : []); }
+  catch(e) { return []; }
+}
+
+function krPct(goal) {
+  const krs = getKRs(goal);
+  if (!krs.length) return goal.done ? 100 : 0;
+  return Math.round(krs.filter(k=>k.done).length / krs.length * 100);
+}
+
+function goalRowHTML(x, editable=true, readonly=false) {
+  const krs = getKRs(x);
+  const pct = krPct(x);
+  const hasDone = krs.length > 0;
+  const cols={weekly:'var(--pu)',monthly:'var(--bl)',annual:'var(--gn)'};
+  const barCol = cols[x.period] || 'var(--pu)';
+  return `<div class="grow" id="grow-${x.id}">
+    <div class="chk ${x.done||pct===100?'on':''} ${readonly?'ro':''}" onclick="${readonly?'':' toggleGoal(\'' + x.id + '\',' + !(x.done) + ')'}"></div>
+    <div style="flex:1;min-width:0">
+      <div class="gtxt ${x.done?'done':''}">${x.text}</div>
+      <div class="gmeta">
+        ${x.owner?`<span class="chip cp">${x.owner}</span>`:''}
+        ${x.due_date?`<span class="chip cd">${x.due_date}</span>`:''}
+        ${hasDone?`<span class="goal-kr-summary">${krs.filter(k=>k.done).length}/${krs.length} items · ${pct}%</span>`:''}
+      </div>
+      ${hasDone?`<div class="kr-pbar" style="margin-top:5px"><div class="kr-pfill" style="width:${pct}%;background:${barCol}"></div></div>`:''}
+      <button class="goal-expand-btn" onclick="toggleKRs('${x.id}')">
+        ▸ ${krs.length ? krs.length + ' key result' + (krs.length>1?'s':'') : 'Add key results'}
+      </button>
+      <div class="kr-section" id="krs-${x.id}" style="display:none">
+        ${krs.length===0?'<div style="font-size:11px;color:var(--t3);margin-bottom:8px">No key results yet — add one below</div>':''}
+        ${krs.map((k,i)=>`<div class="kr-item">
+          <div class="kr-chk ${k.done?'on':''} ${readonly?'ro':''}" onclick="${readonly?'':' toggleKR(\'' + x.id + '\',' + i + ')'}"></div>
+          <span class="kr-text ${k.done?'done':''}">${k.text}</span>
+          ${editable?`<button class="kr-del" onclick="deleteKR('${x.id}',${i})">✕</button>`:''}
+        </div>`).join('')}
+        ${editable?`<div class="kr-add-row">
+          <input type="text" class="kr-input" id="kr-input-${x.id}" placeholder="Add key result..." onkeydown="if(event.key==='Enter')addKR('${x.id}')">
+          <button class="btn btn-primary btn-xs" onclick="addKR('${x.id}')">+ Add</button>
+        </div>`:''}
+      </div>
+    </div>
+    ${editable?`<button class="dbtn" onclick="deleteGoal('${x.id}')">✕</button>`:''}
+  </div>`;
+}
+
+function toggleKRs(goalId) {
+  const el = document.getElementById('krs-' + goalId);
+  const btn = el?.previousElementSibling;
+  if (!el) return;
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (btn) btn.innerHTML = (open ? '▸ ' : '▾ ') + btn.innerHTML.slice(2);
+}
+
+async function addKR(goalId) {
+  const input = document.getElementById('kr-input-' + goalId);
+  const text = input?.value?.trim();
+  if (!text) return;
+  const g = goals.find(x=>x.id===goalId); if(!g) return;
+  const krs = getKRs(g);
+  krs.push({ text, done: false });
+  const { error } = await sb.from('goals').update({ key_results: JSON.stringify(krs) }).eq('id', goalId);
+  if (error) { showToast('Error saving key result', true); return; }
+  g.key_results = JSON.stringify(krs);
+  input.value = '';
+  showToast('Key result added!');
+  rnd();
+}
+
+async function toggleKR(goalId, idx) {
+  const g = goals.find(x=>x.id===goalId); if(!g) return;
+  const krs = getKRs(g);
+  krs[idx].done = !krs[idx].done;
+  // Auto-complete goal if all KRs done
+  const allDone = krs.every(k=>k.done);
+  await sb.from('goals').update({ key_results: JSON.stringify(krs), done: allDone }).eq('id', goalId);
+  g.key_results = JSON.stringify(krs);
+  g.done = allDone;
+  rnd();
+}
+
+async function deleteKR(goalId, idx) {
+  const g = goals.find(x=>x.id===goalId); if(!g) return;
+  const krs = getKRs(g);
+  krs.splice(idx, 1);
+  await sb.from('goals').update({ key_results: JSON.stringify(krs) }).eq('id', goalId);
+  g.key_results = JSON.stringify(krs);
+  rnd();
+}
+
 function rGL(c, a) {
   a.innerHTML = `<button class="btn btn-primary" onclick="ogm()">+ Add Goal</button>`;
   const pc = (p) => {
     const g = goals.filter(x=>x.period===p);
-    const d=g.filter(x=>x.done).length, pct=g.length?Math.round(d/g.length*100):0;
+    // Calculate overall % including KRs
+    const totalPct = g.length ? Math.round(g.reduce((sum,x)=>sum+krPct(x),0)/g.length) : 0;
     const cols={weekly:['var(--pu)','#a89fff'],monthly:['var(--bl)','#7fd4ff'],annual:['var(--gn)','#5fffcb']};
     const [c2,light]=cols[p];
     return `<div class="pcard">
-      <div class="phead"><span class="pdot" style="background:${c2};box-shadow:0 0 7px ${c2}88"></span>
-        <span class="ptitle" style="color:${light}">${p}</span><span class="pcnt">${d}/${g.length}</span></div>
+      <div class="phead">
+        <span class="pdot" style="background:${c2};box-shadow:0 0 7px ${c2}88"></span>
+        <span class="ptitle" style="color:${light}">${p}</span>
+        <span class="pcnt">${totalPct}%</span>
+      </div>
       <div class="pbody">
-        ${g.length===0?`<div class="empty"><div class="eico" style="font-size:22px">◎</div>No ${p} goals</div>`:
-          g.map(x=>`<div class="grow">
-            <div class="chk ${x.done?'on':''}" onclick="toggleGoal('${x.id}',${!x.done})"></div>
-            <div style="flex:1;min-width:0">
-              <div class="gtxt ${x.done?'done':''}">${x.text}</div>
-              <div class="gmeta">${x.owner?`<span class="chip cp">${x.owner}</span>`:''} ${x.due_date?`<span class="chip cd">${x.due_date}</span>`:''}</div>
-            </div>
-            <button class="dbtn" onclick="deleteGoal('${x.id}')">✕</button>
-          </div>`).join('')}
-        <div class="pbrow"><span>${pct}% complete</span></div>
-        <div class="pbar"><div class="pbfill" style="width:${pct}%;background:${c2}"></div></div>
+        ${g.length===0
+          ? `<div class="empty"><div class="eico" style="font-size:22px">◎</div>No ${p} goals</div>`
+          : g.map(x=>goalRowHTML(x, true, false)).join('')}
+        <div class="pbrow"><span>${totalPct}% complete</span></div>
+        <div class="pbar"><div class="pbfill" style="width:${totalPct}%;background:${c2}"></div></div>
       </div>
     </div>`;
   };
@@ -1099,6 +1212,17 @@ async function saveGoal() {
 async function toggleGoal(id, done) {
   await sb.from('goals').update({done}).eq('id',id);
   const g = goals.find(x=>x.id===id); if(g) g.done=done;
+  rnd();
+}
+
+async function empToggleKR(goalId, idx) {
+  const g = goals.find(x=>x.id===goalId); if(!g) return;
+  const krs = getKRs(g);
+  krs[idx].done = !krs[idx].done;
+  const allDone = krs.every(k=>k.done);
+  await sb.from('goals').update({ key_results: JSON.stringify(krs), done: allDone }).eq('id', goalId);
+  g.key_results = JSON.stringify(krs);
+  g.done = allDone;
   rnd();
 }
 
@@ -1622,25 +1746,25 @@ function rMyGL(c) {
   const m = currentEmployee;
   const pc = (p) => {
     const g = goals.filter(x=>x.period===p&&x.owner===m.name);
-    const d=g.filter(x=>x.done).length, pct=g.length?Math.round(d/g.length*100):0;
+    const totalPct = g.length ? Math.round(g.reduce((sum,x)=>sum+krPct(x),0)/g.length) : 0;
     const cols={weekly:['var(--pu)','#a89fff'],monthly:['var(--bl)','#7fd4ff'],annual:['var(--gn)','#5fffcb']};
     const [c2,light]=cols[p];
     return `<div class="pcard">
-      <div class="phead"><span class="pdot" style="background:${c2};box-shadow:0 0 7px ${c2}88"></span>
-        <span class="ptitle" style="color:${light}">${p}</span><span class="pcnt">${d}/${g.length}</span></div>
+      <div class="phead">
+        <span class="pdot" style="background:${c2};box-shadow:0 0 7px ${c2}88"></span>
+        <span class="ptitle" style="color:${light}">${p}</span>
+        <span class="pcnt">${totalPct}%</span>
+      </div>
       <div class="pbody">
-        ${g.length===0?`<div class="empty"><div class="eico">◎</div>No ${p} goals assigned</div>`:
-          g.map(x=>`<div class="grow">
-            <div class="chk ro ${x.done?'on':''}"></div>
-            <div style="flex:1"><div class="gtxt ${x.done?'done':''}">${x.text}</div>
-            ${x.due_date?`<div class="gmeta"><span class="chip cd">Due ${x.due_date}</span></div>`:''}</div>
-          </div>`).join('')}
-        <div class="pbrow"><span>${pct}% complete</span></div>
-        <div class="pbar"><div class="pbfill" style="width:${pct}%;background:${c2}"></div></div>
+        ${g.length===0
+          ? `<div class="empty"><div class="eico">◎</div>No ${p} goals assigned</div>`
+          : g.map(x=>goalRowHTML(x, false, false)).join('')}
+        <div class="pbrow"><span>${totalPct}% complete</span></div>
+        <div class="pbar"><div class="pbfill" style="width:${totalPct}%;background:${c2}"></div></div>
       </div>
     </div>`;
   };
-  c.innerHTML = `<div class="info-pill">ℹ Goals are assigned by your manager</div>
+  c.innerHTML = `<div class="info-pill">ℹ Check off key results as you complete them</div>
     <div class="ggrid">${['weekly','monthly','annual'].map(pc).join('')}</div>`;
 }
 
