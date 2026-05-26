@@ -332,8 +332,8 @@ select option{background:#0d1120}
 .kr-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px;opacity:0;transition:opacity .15s;padding:0 2px}
 .kr-item:hover .kr-del{opacity:1}
 .kr-del:hover{color:var(--rd)}
-.kr-add-row{display:flex;gap:6px;margin-top:8px}
-.kr-input{flex:1;padding:6px 10px;font-size:11px;border-radius:7px;min-height:unset}
+.kr-add-row{display:flex;gap:6px;margin-top:8px;align-items:center}
+.kr-input{flex:1 !important;padding:6px 10px !important;font-size:11px !important;border-radius:7px !important;min-height:unset !important;height:32px !important;resize:none !important}
 .kr-pbar{height:2px;background:rgba(255,255,255,.07);border-radius:1px;overflow:hidden;margin-top:6px}
 .kr-pfill{height:100%;border-radius:1px;transition:width .4s ease}
 .goal-kr-summary{font-size:10px;font-weight:600;color:var(--t3);margin-top:3px}
@@ -1183,17 +1183,56 @@ function rGL(c, a) {
   c.innerHTML = `<div class="ggrid">${['weekly','monthly','annual'].map(pc).join('')}</div>`;
 }
 
+let newGoalKRs = [];
+
 function ogm() {
+  newGoalKRs = [];
   const memberOpts = members.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
   document.getElementById('modal-body').innerHTML = `<div class="mttl">New Goal</div>
-    <div class="fg"><label class="flbl2">Description</label><textarea id="g-tx" placeholder="What does success look like?" style="min-height:80px"></textarea></div>
+    <div class="fg"><label class="flbl2">Description</label><textarea id="g-tx" placeholder="What does success look like?" style="min-height:70px"></textarea></div>
     <div class="fr2">
       <div class="fg" style="margin:0"><label class="flbl2">Period</label><select id="g-pe"><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="annual">Annual</option></select></div>
       <div class="fg" style="margin:0"><label class="flbl2">Owner</label><select id="g-ow"><option value="">— None —</option>${memberOpts}</select></div>
     </div>
-    <div class="fg" style="margin-top:14px"><label class="flbl2">Due Date</label><input type="date" id="g-du"></div>
+    <div class="fg" style="margin-top:12px"><label class="flbl2">Due Date</label><input type="date" id="g-du"></div>
+    <div class="fg" style="margin-top:4px">
+      <label class="flbl2">Key Results <span style="color:var(--t3);font-weight:500;text-transform:none;letter-spacing:0">(optional — steps that make up this goal)</span></label>
+      <div id="new-kr-list" style="margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="new-kr-input" placeholder="Add a key result and press Enter..." style="flex:1;height:36px;padding:6px 12px;font-size:12px" onkeydown="if(event.key==='Enter'){event.preventDefault();addNewGoalKR()}">
+        <button class="btn btn-ghost btn-sm" onclick="addNewGoalKR()" style="flex-shrink:0;height:36px">+ Add</button>
+      </div>
+    </div>
     <div class="mac"><button class="btn btn-ghost" onclick="cm()">Cancel</button><button class="btn btn-primary" onclick="saveGoal()">Save Goal</button></div>`;
   om();
+  renderNewGoalKRs();
+}
+
+function addNewGoalKR() {
+  const input = document.getElementById('new-kr-input');
+  const text = input?.value?.trim();
+  if (!text) return;
+  newGoalKRs.push({ text, done: false });
+  input.value = '';
+  renderNewGoalKRs();
+  input.focus();
+}
+
+function removeNewGoalKR(idx) {
+  newGoalKRs.splice(idx, 1);
+  renderNewGoalKRs();
+}
+
+function renderNewGoalKRs() {
+  const el = document.getElementById('new-kr-list');
+  if (!el) return;
+  if (!newGoalKRs.length) { el.innerHTML = ''; return; }
+  el.innerHTML = newGoalKRs.map((k,i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--b1);border-radius:8px;margin-bottom:5px">
+      <span style="width:16px;height:16px;border-radius:4px;border:1.5px solid var(--b2);display:inline-block;flex-shrink:0"></span>
+      <span style="flex:1;font-size:12px;font-weight:500;color:var(--t1)">${k.text}</span>
+      <button onclick="removeNewGoalKR(${i})" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:12px;padding:0" title="Remove">✕</button>
+    </div>`).join('');
 }
 
 async function saveGoal() {
@@ -1203,10 +1242,12 @@ async function saveGoal() {
     period: document.getElementById('g-pe').value,
     owner: document.getElementById('g-ow').value || null,
     due_date: document.getElementById('g-du').value || null,
-    done: false
+    done: false,
+    key_results: newGoalKRs.length ? JSON.stringify(newGoalKRs) : null
   }).select().single();
   if(error){showToast('Error saving goal',true);return;}
-  goals.push(data); cm(); rnd();
+  goals.push(data); newGoalKRs = []; cm(); rnd();
+  showToast('Goal saved!');
 }
 
 async function toggleGoal(id, done) {
