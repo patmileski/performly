@@ -1098,6 +1098,8 @@ async function redirectToCheckout(planKey) {
 
 function checkSubscriptionStatus() {
   if (!workspace) return;
+  // Only show trial/upgrade banners to managers, not team members
+  if (currentEmployee) return;
   const plan = workspace.plan || 'trial';
   const trialEnds = workspace.trial_ends_at ? new Date(workspace.trial_ends_at) : null;
   const now = new Date();
@@ -1923,6 +1925,9 @@ async function loginEmployee() {
 
 function setupEmployeeSidebar() {
   const m = currentEmployee;
+  // Always hide trial banner for team members
+  const banner = document.getElementById('trial-banner');
+  if (banner) banner.style.display = 'none';
   const mi = members.findIndex(x => x.id === m.id);
   const mc = col(mi >= 0 ? mi : 0);
   document.getElementById('sb-uname').textContent = m.name;
