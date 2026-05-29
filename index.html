@@ -333,8 +333,8 @@ select option{background:#0d1120}
 .kr-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px;opacity:0;transition:opacity .15s;padding:0 2px}
 .kr-item:hover .kr-del{opacity:1}
 .kr-del:hover{color:var(--rd)}
-.kr-add-row{display:flex;gap:6px;margin-top:8px;align-items:center}
-.kr-input{flex:1 !important;padding:6px 10px !important;font-size:11px !important;border-radius:7px !important;min-height:unset !important;height:32px !important;resize:none !important}
+.kr-add-row{display:flex;gap:8px;margin-top:10px;align-items:center}
+.kr-input{flex:1 !important;padding:10px 14px !important;font-size:13px !important;font-weight:500 !important;border-radius:8px !important;min-height:unset !important;height:40px !important;resize:none !important;width:100% !important;box-sizing:border-box !important}
 .kr-pbar{height:2px;background:rgba(255,255,255,.07);border-radius:1px;overflow:hidden;margin-top:6px}
 .kr-pfill{height:100%;border-radius:1px;transition:width .4s ease}
 .goal-kr-summary{font-size:10px;font-weight:600;color:var(--t3);margin-top:3px}
@@ -1321,7 +1321,7 @@ function goalRowHTML(x, editable=true, readonly=false) {
         </div>`).join('')}
         ${editable?`<div class="kr-add-row">
           <input type="text" class="kr-input" id="kr-input-${x.id}" placeholder="Add key result..." onkeydown="if(event.key==='Enter')addKR('${x.id}')">
-          <button class="btn btn-primary btn-xs" onclick="addKR('${x.id}')">+ Add</button>
+          <button class="btn btn-primary btn-sm" onclick="addKR('${x.id}')" style="height:40px;flex-shrink:0;padding:0 16px">+ Add</button>
         </div>`:''}
       </div>
     </div>
