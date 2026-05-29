@@ -1096,10 +1096,14 @@ async function redirectToCheckout(planKey) {
   }
 }
 
+const SUPERUSER_EMAIL = 'pmileski@gmail.com';
+
 function checkSubscriptionStatus() {
   if (!workspace) return;
   // Only show trial/upgrade banners to managers, not team members
   if (currentEmployee) return;
+  // Superuser always has full access - no paywall, no banner
+  if (currentUser && currentUser.email === SUPERUSER_EMAIL) return;
   const plan = workspace.plan || 'trial';
   const trialEnds = workspace.trial_ends_at ? new Date(workspace.trial_ends_at) : null;
   const now = new Date();
