@@ -25,17 +25,17 @@ html{scroll-behavior:smooth}
 body{font-family:'Inter',sans-serif;background:var(--white);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
 /* ── NAV ── */
-.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;padding:0 48px;gap:40px}
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:64px;display:flex;align-items:center;padding:0 32px;gap:32px}
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
 .nav-logo-mark{width:34px;height:34px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:white;letter-spacing:-.5px}
 .nav-logo-name{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.4px}
 .nav-links{display:flex;align-items:center;gap:4px;flex:1}
-.nav-link{font-size:14px;font-weight:500;color:var(--ink2);text-decoration:none;padding:6px 12px;border-radius:7px;transition:all .15s;white-space:nowrap}
+.nav-link{font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;padding:5px 10px;border-radius:7px;transition:all .15s;white-space:nowrap}
 .nav-link:hover{background:var(--off2);color:var(--ink)}
 .nav-end{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0}
-.btn-login{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:var(--ink);background:none;border:1.5px solid var(--border2);padding:8px 18px;border-radius:8px;cursor:pointer;text-decoration:none;transition:all .15s}
+.btn-login{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--ink);background:none;border:1.5px solid var(--border2);padding:7px 16px;border-radius:8px;cursor:pointer;text-decoration:none;transition:all .15s}
 .btn-login:hover{border-color:var(--blue);color:var(--blue)}
-.btn-demo{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:white;background:var(--blue);border:none;padding:9px 20px;border-radius:8px;cursor:pointer;text-decoration:none;transition:all .2s;box-shadow:0 2px 8px rgba(31,77,219,.3)}
+.btn-demo{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:white;background:var(--blue);border:none;padding:8px 18px;border-radius:8px;cursor:pointer;text-decoration:none;transition:all .2s;box-shadow:0 2px 8px rgba(31,77,219,.3)}
 .btn-demo:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(31,77,219,.4)}
 
 /* ── HERO ── */
@@ -243,7 +243,7 @@ footer{background:var(--ink);padding:72px 48px 40px}
     <div class="nav-logo-mark">C</div>
     <span class="nav-logo-name">CoachOps360</span>
   </a>
-  <div class="nav-links">
+  <div class="nav-links" style="display:flex;align-items:center;gap:2px;flex:1">
     <a href="#features" class="nav-link">Features</a>
     <a href="#how-it-works" class="nav-link">How it works</a>
     <a href="#roles" class="nav-link">For your team</a>
