@@ -355,6 +355,28 @@ select option{background:#0d1120}
 .upload-zone-text{font-size:13px;font-weight:600;color:var(--t2)}
 .upload-zone-sub{font-size:11px;color:var(--t3);margin-top:4px}
 
+
+/* ── ACCOUNT SETTINGS ── */
+.acct-grid{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start}
+.acct-sidebar{background:var(--s1);border:1px solid var(--b1);border-radius:14px;overflow:hidden;position:sticky;top:20px}
+.acct-nav-item{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.acct-nav-item:hover{background:rgba(255,255,255,.05);color:var(--t1)}
+.acct-nav-item.active{background:var(--pus);color:#a89fff;border-left-color:var(--pu)}
+.acct-nav-icon{font-size:15px;flex-shrink:0}
+.acct-panel{display:none}
+.acct-panel.active{display:block}
+.acct-section{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:24px;margin-bottom:16px}
+.acct-section-title{font-size:14px;font-weight:800;color:var(--t1);margin-bottom:4px;letter-spacing:-.3px}
+.acct-section-sub{font-size:12px;color:var(--t3);margin-bottom:20px}
+.acct-divider{height:1px;background:var(--b1);margin:20px 0}
+.plan-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.plan-badge.trial{background:var(--ams);color:var(--am)}
+.plan-badge.active{background:var(--gns);color:var(--gn)}
+.plan-badge.cancelled{background:var(--rds);color:var(--rd)}
+.danger-zone{background:rgba(255,77,109,.05);border:1px solid rgba(255,77,109,.2);border-radius:14px;padding:24px;margin-bottom:16px}
+.danger-title{font-size:14px;font-weight:800;color:var(--rd);margin-bottom:4px}
+.danger-sub{font-size:12px;color:var(--t2);margin-bottom:16px;line-height:1.6}
+
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
@@ -1194,7 +1216,9 @@ function setupSidebar() {
     <div class="nlbl">Team</div>
     <div class="nitem" onclick="go('sessions')" id="n-sessions"><span class="ni">📅</span>1:1 Sessions<span class="nbadge" id="sbadge">0</span></div>
     <div class="nitem" onclick="go('members')" id="n-members"><span class="ni">◉</span>Team Members</div>
-    <div class="nitem" onclick="go('jobs')" id="n-jobs"><span class="ni">◫</span>Job Descriptions</div>`;
+    <div class="nitem" onclick="go('jobs')" id="n-jobs"><span class="ni">◫</span>Job Descriptions</div>
+    <div class="nlbl" style="margin-top:12px">Account</div>
+    <div class="nitem" onclick="go('account')" id="n-account"><span class="ni">⚙</span>Account Settings</div>`;
   refreshBadges();
 }
 
@@ -1212,6 +1236,7 @@ const VMETA = {
   'my-coaching':  ['My Coaching Notes','Notes from your sessions'],
   'my-job':       ['My Job Description','Your role & responsibilities'],
   'my-reviews':   ['My Annual Reviews','Your performance reviews'],
+  'account':      ['Account Settings','Billing, profile & subscription'],
 };
 
 function go(v) {
@@ -1228,7 +1253,7 @@ function rnd() {
   const c = document.getElementById('content');
   const a = document.getElementById('topbar-actions');
   a.innerHTML = '';
-  const views = { overview:rOV, goals:rGL, tasks:rTK, sessions:rSS, members:rMB, jobs:rJB, 'my-overview':rMyOV, 'my-goals':rMyGL, 'my-tasks':rMyTK, 'my-sessions':rMySS, 'my-coaching':rMyCH, 'my-job':rMyJB, 'my-reviews':rMyReviews };
+  const views = { overview:rOV, goals:rGL, tasks:rTK, sessions:rSS, members:rMB, jobs:rJB, 'my-overview':rMyOV, 'my-goals':rMyGL, 'my-tasks':rMyTK, 'my-sessions':rMySS, 'my-coaching':rMyCH, 'my-job':rMyJB, 'my-reviews':rMyReviews, account:rAccount };
   (views[currentView] || (()=>{ c.innerHTML='<div class="empty">Coming soon</div>'; }))(c, a);
 }
 
@@ -2522,6 +2547,276 @@ async function rMyReviews(c) {
 
   const reviews = await loadReviews(m.id);
   document.getElementById('my-review-list').innerHTML = renderReviewList(reviews, false);
+}
+
+
+// ══════════════════════════════════════════════════════
+// ACCOUNT SETTINGS
+// ══════════════════════════════════════════════════════
+let acctTab = 'profile';
+
+function rAccount(c) {
+  const plan = workspace.plan || 'trial';
+  const trialEnds = workspace.trial_ends_at ? new Date(workspace.trial_ends_at) : null;
+  const now = new Date();
+  const daysLeft = trialEnds ? Math.ceil((trialEnds - now) / 86400000) : null;
+  const planLabel = { trial: 'Free Trial', active: 'Active', cancelled: 'Cancelled', expired: 'Expired', payment_failed: 'Payment Failed' }[plan] || plan;
+  const planNames = { 'price_1TcACT3vtv7KGYjk7zObexSc': 'Starter ($19/mo)', 'price_1TcACT3vtv7KGYjkTWOopiYx': 'Growth ($49/mo)', 'price_1TcACW3vtv7KGYjk8CT2JuUn': 'Pro ($99/mo)' };
+
+  c.innerHTML = `
+  <div class="acct-grid">
+    <div class="acct-sidebar">
+      <div class="acct-nav-item ${acctTab==='profile'?'active':''}" onclick="switchAcctTab('profile')"><span class="acct-nav-icon">👤</span>Profile</div>
+      <div class="acct-nav-item ${acctTab==='billing'?'active':''}" onclick="switchAcctTab('billing')"><span class="acct-nav-icon">💳</span>Billing & Plan</div>
+      <div class="acct-nav-item ${acctTab==='workspace'?'active':''}" onclick="switchAcctTab('workspace')"><span class="acct-nav-icon">🏢</span>Workspace</div>
+      <div class="acct-nav-item ${acctTab==='danger'?'active':''}" onclick="switchAcctTab('danger')" style="color:var(--rd)"><span class="acct-nav-icon">⚠️</span>Cancel Account</div>
+    </div>
+    <div>
+
+      <!-- PROFILE TAB -->
+      <div class="acct-panel ${acctTab==='profile'?'active':''}" id="acct-profile">
+        <div class="acct-section">
+          <div class="acct-section-title">Profile Information</div>
+          <div class="acct-section-sub">Update your name and email address</div>
+          <div class="field"><label class="flbl">Full Name</label>
+            <input type="text" id="acct-name" value="${currentUser?.user_metadata?.full_name||''}" placeholder="Your full name">
+          </div>
+          <div class="field" style="margin-top:14px"><label class="flbl">Email Address</label>
+            <input type="email" id="acct-email" value="${currentUser?.email||''}" placeholder="your@email.com">
+          </div>
+          <div class="err" id="profile-err"></div>
+          <div class="ok-msg" id="profile-ok"></div>
+          <button class="btn btn-primary" style="margin-top:16px" onclick="saveProfile()">Save Changes</button>
+        </div>
+        <div class="acct-section">
+          <div class="acct-section-title">Change Password</div>
+          <div class="acct-section-sub">Leave blank if you don't want to change your password</div>
+          <div class="field"><label class="flbl">New Password</label>
+            <input type="password" id="acct-pw" placeholder="Min 6 characters">
+          </div>
+          <div class="field" style="margin-top:14px"><label class="flbl">Confirm New Password</label>
+            <input type="password" id="acct-pw2" placeholder="Repeat new password">
+          </div>
+          <div class="err" id="pw-err"></div>
+          <div class="ok-msg" id="pw-ok"></div>
+          <button class="btn btn-primary" style="margin-top:16px" onclick="savePassword()">Update Password</button>
+        </div>
+      </div>
+
+      <!-- BILLING TAB -->
+      <div class="acct-panel ${acctTab==='billing'?'active':''}" id="acct-billing">
+        <div class="acct-section">
+          <div class="acct-section-title">Current Plan</div>
+          <div class="acct-section-sub">Your subscription details</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+            <span class="plan-badge ${plan}">${planLabel}</span>
+            ${plan==='trial'&&daysLeft!==null ? `<span style="font-size:12px;color:var(--am);font-weight:600">${daysLeft} days remaining</span>` : ''}
+          </div>
+          <div style="background:var(--s2);border-radius:10px;padding:16px;margin-bottom:20px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Plan</div>
+                <div style="font-size:14px;font-weight:700;color:var(--t1)">${plan==='trial'?'Free Trial':plan==='active'?'Paid Subscription':'—'}</div>
+              </div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Team Members</div>
+                <div style="font-size:14px;font-weight:700;color:var(--t1)">${members.length} / ${workspace.plan_member_limit||5}</div>
+              </div>
+              ${trialEnds?`<div><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${plan==='trial'?'Trial Ends':'Next Billing'}</div>
+                <div style="font-size:14px;font-weight:700;color:var(--t1)">${trialEnds.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+              </div>`:''}
+            </div>
+          </div>
+          ${plan==='trial'||plan==='cancelled'||plan==='expired' ? `
+          <button class="btn btn-primary" onclick="showPricing()">Upgrade Plan →</button>` : `
+          <button class="btn btn-ghost" onclick="manageBilling()">Manage Billing & Invoices →</button>`}
+        </div>
+        <div class="acct-section">
+          <div class="acct-section-title">Change Plan</div>
+          <div class="acct-section-sub">Upgrade or switch your subscription plan</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+            ${Object.entries(STRIPE_PRICES).map(([key,p])=>`
+            <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;text-align:center">
+              <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">${p.name}</div>
+              <div style="font-size:24px;font-weight:900;color:var(--t1);letter-spacing:-1px;margin-bottom:4px">$${p.price}</div>
+              <div style="font-size:10px;color:var(--t3);margin-bottom:12px">per month · up to ${p.members===999?'unlimited':p.members} members</div>
+              <button class="btn btn-ghost btn-sm" style="width:100%" onclick="startCheckout('${key}')">Select →</button>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKSPACE TAB -->
+      <div class="acct-panel ${acctTab==='workspace'?'active':''}" id="acct-workspace">
+        <div class="acct-section">
+          <div class="acct-section-title">Workspace Details</div>
+          <div class="acct-section-sub">Update your workspace name</div>
+          <div class="field"><label class="flbl">Workspace Name</label>
+            <input type="text" id="acct-wsname" value="${workspace.name||''}" placeholder="Your workspace name">
+          </div>
+          <div class="field" style="margin-top:14px">
+            <label class="flbl">Workspace ID <span style="font-size:10px;font-weight:500;color:var(--t3)">(share this with your team members)</span></label>
+            <div style="display:flex;gap:8px">
+              <input type="text" value="${workspace.id}" readonly style="flex:1;background:var(--s2);color:var(--t2)">
+              <button class="btn btn-ghost btn-sm" onclick="copyWorkspaceId()">Copy</button>
+            </div>
+          </div>
+          <div class="err" id="ws-err"></div>
+          <div class="ok-msg" id="ws-ok"></div>
+          <button class="btn btn-primary" style="margin-top:16px" onclick="saveWorkspaceName()">Save Changes</button>
+        </div>
+      </div>
+
+      <!-- DANGER TAB -->
+      <div class="acct-panel ${acctTab==='danger'?'active':''}" id="acct-danger">
+        <div class="danger-zone">
+          <div class="danger-title">Cancel Subscription</div>
+          <div class="danger-sub">If you cancel your subscription, you'll keep access until the end of your current billing period. After that, your account will be downgraded and you won't be able to add new team members or access premium features. Your data will be preserved.</div>
+          <button class="btn btn-danger" onclick="cancelSubscription()">Cancel Subscription</button>
+        </div>
+        <div class="danger-zone" style="margin-top:0">
+          <div class="danger-title">Delete Account</div>
+          <div class="danger-sub">Permanently delete your workspace and all data including team members, goals, coaching notes, sessions, tasks, and reviews. This action <strong>cannot be undone</strong>.</div>
+          <button class="btn btn-danger" onclick="deleteAccount()">Delete My Account</button>
+        </div>
+      </div>
+
+    </div>
+  </div>`;
+}
+
+function switchAcctTab(tab) {
+  acctTab = tab;
+  rAccount(document.getElementById('content'));
+}
+
+async function saveProfile() {
+  const name = document.getElementById('acct-name').value.trim();
+  const email = document.getElementById('acct-email').value.trim();
+  const errEl = document.getElementById('profile-err');
+  const okEl = document.getElementById('profile-ok');
+  errEl.classList.remove('show'); okEl.classList.remove('show');
+
+  if (!email) { errEl.textContent = 'Email is required.'; errEl.classList.add('show'); return; }
+
+  try {
+    const updates = {};
+    if (email !== currentUser.email) updates.email = email;
+    if (name) updates.data = { full_name: name };
+
+    if (Object.keys(updates).length === 0) {
+      okEl.textContent = 'No changes to save.'; okEl.classList.add('show'); return;
+    }
+
+    const r = await fetch(SUPABASE_URL + '/auth/v1/user', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + sb._session?.access_token },
+      body: JSON.stringify(updates)
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.message || 'Update failed');
+
+    currentUser = { ...currentUser, ...data };
+    if (email !== currentUser.email) {
+      okEl.textContent = 'Check your new email address to confirm the change.';
+    } else {
+      okEl.textContent = 'Profile updated successfully!';
+    }
+    okEl.classList.add('show');
+    showToast('Profile updated!');
+  } catch(e) {
+    errEl.textContent = e.message; errEl.classList.add('show');
+  }
+}
+
+async function savePassword() {
+  const pw = document.getElementById('acct-pw').value;
+  const pw2 = document.getElementById('acct-pw2').value;
+  const errEl = document.getElementById('pw-err');
+  const okEl = document.getElementById('pw-ok');
+  errEl.classList.remove('show'); okEl.classList.remove('show');
+
+  if (!pw) { errEl.textContent = 'Please enter a new password.'; errEl.classList.add('show'); return; }
+  if (pw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.classList.add('show'); return; }
+  if (pw !== pw2) { errEl.textContent = "Passwords don't match."; errEl.classList.add('show'); return; }
+
+  try {
+    const r = await fetch(SUPABASE_URL + '/auth/v1/user', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + sb._session?.access_token },
+      body: JSON.stringify({ password: pw })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.message || 'Password update failed');
+    okEl.textContent = 'Password updated successfully!'; okEl.classList.add('show');
+    document.getElementById('acct-pw').value = '';
+    document.getElementById('acct-pw2').value = '';
+    showToast('Password updated!');
+  } catch(e) {
+    errEl.textContent = e.message; errEl.classList.add('show');
+  }
+}
+
+async function saveWorkspaceName() {
+  const name = document.getElementById('acct-wsname').value.trim();
+  const errEl = document.getElementById('ws-err');
+  const okEl = document.getElementById('ws-ok');
+  errEl.classList.remove('show'); okEl.classList.remove('show');
+
+  if (!name) { errEl.textContent = 'Workspace name is required.'; errEl.classList.add('show'); return; }
+
+  const { error } = await sb.from('workspaces').update({ name }).eq('id', workspace.id);
+  if (error) { errEl.textContent = error.message; errEl.classList.add('show'); return; }
+
+  workspace.name = name;
+  document.getElementById('sb-uname').textContent = name;
+  document.getElementById('sb-av').textContent = ini(name);
+  okEl.textContent = 'Workspace name updated!'; okEl.classList.add('show');
+  showToast('Workspace updated!');
+}
+
+async function manageBilling() {
+  showToast('Opening Stripe billing portal...');
+  // Redirect to Stripe customer portal
+  // For now show info - full portal requires a server endpoint
+  if (workspace.stripe_customer_id) {
+    showToast('Contact support to manage your billing details.', false);
+  } else {
+    showToast('No active subscription found. Please subscribe first.', true);
+  }
+}
+
+async function cancelSubscription() {
+  if (!confirm('Are you sure you want to cancel your subscription?\n\nYou will keep access until the end of your current billing period.')) return;
+
+  const { error } = await sb.from('workspaces').update({ plan: 'cancelled' }).eq('id', workspace.id);
+  if (error) { showToast('Error: ' + error.message, true); return; }
+
+  workspace.plan = 'cancelled';
+  showToast('Subscription cancelled. You keep access until the end of your billing period.');
+  rAccount(document.getElementById('content'));
+}
+
+async function deleteAccount() {
+  const confirm1 = confirm('⚠️ This will permanently delete your workspace and ALL data.\n\nThis cannot be undone. Are you absolutely sure?');
+  if (!confirm1) return;
+
+  const input = prompt('Type DELETE to confirm:');
+  if (input !== 'DELETE') { showToast('Account deletion cancelled.'); return; }
+
+  try {
+    // Delete all workspace data
+    await sb.from('coaching_notes').delete().eq('workspace_id', workspace.id);
+    await sb.from('sessions').delete().eq('workspace_id', workspace.id);
+    await sb.from('tasks').delete().eq('workspace_id', workspace.id);
+    await sb.from('goals').delete().eq('workspace_id', workspace.id);
+    await sb.from('members').delete().eq('workspace_id', workspace.id);
+    await sb.from('job_descriptions').delete().eq('workspace_id', workspace.id);
+    await sb.from('workspaces').delete().eq('id', workspace.id);
+
+    showToast('Account deleted. Signing out...');
+    setTimeout(() => signOut(), 2000);
+  } catch(e) {
+    showToast('Error deleting account: ' + e.message, true);
+  }
 }
 
 // ══════════════════════════════════════════════════════
