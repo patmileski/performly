@@ -1,1 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoachOps360 — Where Great Teams Are Built</title>
+<meta name="description" content="CoachOps360 is the team development platform that turns regular 1:1s, clear goals, and honest coaching into a culture where everyone grows. Start free for 30 days.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#ffffff;--off:#f9f8f6;--off2:#f2f0ec;--off3:#e8e5de;
+  --ink:#1a1814;--ink2:#4a4640;--ink3:#8a8580;
+  --blue:#1f4ddb;--blue2:#1638a8;--bluebg:#eef2fd;--bluelight:#e8eeff;
+  --green:#0d7a55;--greenbg:#e6f5f0;
+  --amber:#c96f00;--amberbg:#fef3e0;
+  --purple:#6b21e8;--purplebg:#f3eeff;
+  --border:#e4e1d9;--border2:#ccc8be;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.05);
+  --shadow:0 4px 16px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.05);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.05);
+  --radius:12px;--radius-lg:20px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--white);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;padding:0 48px;gap:40px}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.nav-logo-mark{width:34px;height:34px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:white;letter-spacing:-.5px}
+.nav-logo-name{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.4px}
+.nav-links{display:flex;align-items:center;gap:4px;flex:1}
+.nav-link{font-size:14px;font-weight:500;color:var(--ink2);text-decoration:none;padding:6px 12px;border-radius:7px;transition:all .15s;white-space:nowrap}
+.nav-link:hover{background:var(--off2);color:var(--ink)}
+.nav-end{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0}
+.btn-login{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:var(--ink);background:none;border:1.5px solid var(--border2);padding:8px 18px;border-radius:8px;cursor:pointer;text-decoration:none;transition:all .15s}
+.btn-login:hover{border-color:var(--blue);color:var(--blue)}
+.btn-demo{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:white;background:var(--blue);border:none;padding:9px 20px;border-radius:8px;cursor:pointer;text-decoration:none;transition:all .2s;box-shadow:0 2px 8px rgba(31,77,219,.3)}
+.btn-demo:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(31,77,219,.4)}
+
+/* ── HERO ── */
+.hero{padding:80px 48px 60px;max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--greenbg);border:1px solid rgba(13,122,85,.18);border-radius:100px;padding:5px 14px 5px 6px;font-size:12px;font-weight:600;color:var(--green);margin-bottom:28px}
+.hero-eyebrow-pill{background:var(--green);color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.5px;text-transform:uppercase}
+.hero-h1{font-size:56px;font-weight:900;line-height:1.04;letter-spacing:-2.5px;color:var(--ink);margin-bottom:22px}
+.hero-h1 .accent{color:var(--blue)}
+.hero-sub{font-size:18px;font-weight:400;color:var(--ink2);line-height:1.65;margin-bottom:36px;max-width:500px}
+.hero-actions{display:flex;gap:12px;align-items:center;margin-bottom:28px}
+.btn-hero-cta{font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:white;background:var(--blue);border:none;padding:14px 28px;border-radius:10px;cursor:pointer;text-decoration:none;transition:all .2s;box-shadow:0 4px 16px rgba(31,77,219,.35);display:inline-flex;align-items:center;gap:8px}
+.btn-hero-cta:hover{background:var(--blue2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(31,77,219,.4)}
+.btn-hero-ghost{font-family:'Inter',sans-serif;font-size:15px;font-weight:600;color:var(--ink);background:white;border:1.5px solid var(--border2);padding:14px 28px;border-radius:10px;cursor:pointer;text-decoration:none;transition:all .15s;display:inline-flex;align-items:center;gap:8px}
+.btn-hero-ghost:hover{border-color:var(--blue);color:var(--blue)}
+.hero-social{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink3)}
+.stars{color:#f59e0b;letter-spacing:1px;font-size:14px}
+.hero-img{position:relative}
+.mock-window{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden}
+.mock-titlebar{background:var(--off2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:8px}
+.mock-dot{width:11px;height:11px;border-radius:50%}
+.mock-url{flex:1;background:white;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:11px;color:var(--ink3);text-align:center;margin:0 12px}
+.mock-body{padding:20px}
+.mock-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.mock-greeting{font-size:14px;font-weight:700;color:var(--ink)}
+.mock-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;background:var(--bluebg);color:var(--blue);letter-spacing:.5px;text-transform:uppercase}
+.mock-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.mock-stat{background:var(--off);border:1px solid var(--border);border-radius:10px;padding:12px}
+.mock-stat-n{font-size:22px;font-weight:900;color:var(--ink);letter-spacing:-1px}
+.mock-stat-l{font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.mock-section-title{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.mock-member{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--off);border:1px solid var(--border);border-radius:9px;margin-bottom:6px}
+.mock-av{width:28px;height:28px;border-radius:7px;font-size:10px;font-weight:800;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mock-minfo{flex:1}
+.mock-mname{font-size:12px;font-weight:600;color:var(--ink)}
+.mock-mrole{font-size:10px;color:var(--ink3)}
+.mock-pbar{width:72px}
+.mock-pbar-track{height:4px;background:var(--off3);border-radius:2px;overflow:hidden}
+.mock-pbar-fill{height:100%;border-radius:2px}
+.mock-pbar-pct{font-size:9px;color:var(--ink3);text-align:right;margin-top:2px}
+.mock-session{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bluelight);border:1px solid rgba(31,77,219,.15);border-radius:9px;margin-top:10px}
+.mock-session-icon{font-size:16px}
+.mock-session-info{flex:1}
+.mock-session-title{font-size:12px;font-weight:600;color:var(--ink)}
+.mock-session-time{font-size:10px;color:var(--ink3);margin-top:1px}
+.mock-session-badge{font-size:10px;font-weight:700;color:var(--blue);background:white;padding:2px 8px;border-radius:100px;border:1px solid rgba(31,77,219,.2)}
+.float-card{position:absolute;background:white;border:1px solid var(--border);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px}
+.float-1{top:-18px;right:-20px;animation:float-a 5s ease-in-out infinite}
+.float-2{bottom:-14px;left:-18px;animation:float-b 5s ease-in-out 2.5s infinite}
+@keyframes float-a{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes float-b{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+.float-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.float-title{font-size:12px;font-weight:700;color:var(--ink)}
+.float-sub{font-size:11px;color:var(--ink3);margin-top:1px}
+
+/* ── LOGOS ── */
+.logos-bar{background:var(--off);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:28px 48px}
+.logos-bar-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:48px;flex-wrap:wrap;justify-content:center}
+.logos-label{font-size:12px;font-weight:600;color:var(--ink3);letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap}
+.logos-divider{width:1px;height:20px;background:var(--border2)}
+.logo-item{font-size:16px;font-weight:800;color:var(--border2);letter-spacing:-.5px}
+
+/* ── FEATURES ── */
+.section{padding:96px 48px;max-width:1240px;margin:0 auto}
+.section-eyebrow{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:14px}
+.section-h2{font-size:44px;font-weight:900;letter-spacing:-2px;color:var(--ink);line-height:1.08;margin-bottom:16px}
+.section-sub{font-size:17px;color:var(--ink2);line-height:1.68;max-width:560px}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+.feat-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:30px;transition:all .2s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(31,77,219,.03));opacity:0;transition:opacity .2s}
+.feat-card:hover{border-color:var(--blue);box-shadow:var(--shadow-lg);transform:translateY(-3px)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px}
+.feat-title{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.4px;margin-bottom:8px}
+.feat-desc{font-size:14px;color:var(--ink2);line-height:1.68}
+
+/* ── SPLIT SECTION ── */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;padding:80px 48px;max-width:1240px;margin:0 auto}
+.split.reverse{direction:rtl}
+.split.reverse>*{direction:ltr}
+.split-visual{position:relative}
+.screen-mock{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden}
+.screen-header{background:linear-gradient(135deg,#1a2240,#2d3d6b);padding:16px 20px;display:flex;align-items:center;gap:8px}
+.screen-dots{display:flex;gap:5px}
+.screen-dot{width:10px;height:10px;border-radius:50%}
+.screen-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);margin-left:auto}
+.screen-body{padding:18px}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 5px;border-radius:100px;font-size:12px;font-weight:700}
+.check-list{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+.check-item{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:var(--ink2);line-height:1.5}
+.check-ico{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
+
+/* ── ROLES ── */
+.roles-bg{background:var(--off);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.roles-inner{max-width:1240px;margin:0 auto;padding:96px 48px}
+.roles-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:56px}
+.role-card{background:white;border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:36px;transition:all .2s}
+.role-card:hover{box-shadow:var(--shadow-lg);border-color:var(--blue)}
+.role-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:100px;font-size:12px;font-weight:700;margin-bottom:22px}
+.role-h3{font-size:24px;font-weight:800;letter-spacing:-.6px;color:var(--ink);margin-bottom:10px}
+.role-p{font-size:14px;color:var(--ink2);line-height:1.68;margin-bottom:24px}
+.role-list{display:flex;flex-direction:column;gap:10px}
+.role-item{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink2)}
+.role-check{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700}
+
+/* ── STEPS ── */
+.steps-section{padding:96px 48px;max-width:1240px;margin:0 auto}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;position:relative}
+.steps-grid::before{content:'';position:absolute;top:28px;left:12.5%;right:12.5%;height:1.5px;background:linear-gradient(90deg,var(--blue),var(--bluelight));z-index:0}
+.step{text-align:center;padding:0 16px;position:relative;z-index:1}
+.step-num{width:56px;height:56px;border-radius:50%;background:var(--blue);color:white;font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 0 0 8px var(--bluebg)}
+.step-title{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:8px;letter-spacing:-.3px}
+.step-desc{font-size:13px;color:var(--ink2);line-height:1.6}
+
+/* ── PRICING ── */
+.pricing-section{background:var(--ink);position:relative;overflow:hidden}
+.pricing-glow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(31,77,219,.3),transparent 65%);top:-200px;right:-200px;pointer-events:none}
+.pricing-glow2{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(107,33,232,.2),transparent 65%);bottom:-150px;left:-100px;pointer-events:none}
+.pricing-inner{max-width:1100px;margin:0 auto;padding:96px 48px;position:relative;z-index:1}
+.pricing-head{text-align:center;margin-bottom:56px}
+.pricing-eyebrow{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px}
+.pricing-h2{font-size:44px;font-weight:900;letter-spacing:-2px;color:white;margin-bottom:12px}
+.pricing-sub{font-size:16px;color:rgba(255,255,255,.5);line-height:1.65}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.pc{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-lg);padding:36px;position:relative;transition:all .2s}
+.pc:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.22)}
+.pc.popular{background:white;border-color:white}
+.pc-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--blue);color:white;font-size:11px;font-weight:700;padding:4px 18px;border-radius:100px;letter-spacing:.5px;white-space:nowrap}
+.pc-name{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:20px}
+.pc-name-dark{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin-bottom:20px}
+.pc-price{font-size:52px;font-weight:900;letter-spacing:-3px;color:white;line-height:1}
+.pc-price-dark{font-size:52px;font-weight:900;letter-spacing:-3px;color:var(--ink);line-height:1}
+.pc-period{font-size:13px;color:rgba(255,255,255,.4);margin-top:4px;margin-bottom:6px}
+.pc-period-dark{font-size:13px;color:var(--ink3);margin-top:4px;margin-bottom:6px}
+.pc-trial{font-size:12px;font-weight:700;color:#4ade80;margin-bottom:24px}
+.pc-trial-dark{font-size:12px;font-weight:700;color:var(--green);margin-bottom:24px}
+.pc-div{height:1px;background:rgba(255,255,255,.1);margin-bottom:24px}
+.pc-div-dark{height:1px;background:var(--border);margin-bottom:24px}
+.pc-list{display:flex;flex-direction:column;gap:11px;margin-bottom:32px}
+.pc-item{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.7)}
+.pc-item-dark{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink2)}
+.pc-check{color:#4ade80;font-size:15px;flex-shrink:0}
+.pc-check-dark{color:var(--blue);font-size:15px;flex-shrink:0}
+.btn-pc{font-family:'Inter',sans-serif;font-size:14px;font-weight:700;padding:13px;border-radius:10px;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:all .2s;border:none}
+.btn-pc-outline{background:rgba(255,255,255,.1);color:white;border:1.5px solid rgba(255,255,255,.2)}
+.btn-pc-outline:hover{background:rgba(255,255,255,.18)}
+.btn-pc-solid{background:var(--blue);color:white;box-shadow:0 4px 16px rgba(31,77,219,.5)}
+.btn-pc-solid:hover{background:var(--blue2)}
+
+/* ── TESTIMONIALS ── */
+.testi-section{padding:96px 48px;max-width:1240px;margin:0 auto}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px}
+.testi{background:var(--off);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:32px;transition:all .2s}
+.testi:hover{background:white;box-shadow:var(--shadow-lg);border-color:var(--border2)}
+.testi-stars{color:#f59e0b;font-size:15px;letter-spacing:1px;margin-bottom:16px}
+.testi-q{font-size:15px;color:var(--ink2);line-height:1.72;margin-bottom:24px;font-style:italic}
+.testi-q::before{content:'"';font-size:40px;color:var(--border2);font-family:Georgia,serif;line-height:0;vertical-align:-16px;margin-right:2px}
+.testi-author{display:flex;align-items:center;gap:12px}
+.testi-av{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white;flex-shrink:0}
+.testi-name{font-size:14px;font-weight:700;color:var(--ink)}
+.testi-title{font-size:12px;color:var(--ink3);margin-top:1px}
+
+/* ── CTA ── */
+.cta-section{background:var(--bluebg);border-top:1px solid rgba(31,77,219,.12);border-bottom:1px solid rgba(31,77,219,.12);padding:96px 48px}
+.cta-inner{max-width:680px;margin:0 auto;text-align:center}
+.cta-h2{font-size:48px;font-weight:900;letter-spacing:-2px;color:var(--ink);line-height:1.06;margin-bottom:16px}
+.cta-sub{font-size:17px;color:var(--ink2);line-height:1.65;margin-bottom:36px}
+.cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.cta-note{font-size:13px;color:var(--ink3);margin-top:16px}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);padding:72px 48px 40px}
+.footer-inner{max-width:1240px;margin:0 auto}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:56px}
+.footer-brand{font-size:18px;font-weight:800;color:white;margin-bottom:12px;letter-spacing:-.5px}
+.footer-tagline{font-size:13px;color:rgba(255,255,255,.4);line-height:1.65;max-width:260px}
+.footer-col-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:18px}
+.footer-links{display:flex;flex-direction:column;gap:12px}
+.footer-link{font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;transition:color .15s}
+.footer-link:hover{color:white}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:28px;display:flex;justify-content:space-between;align-items:center}
+.footer-copy{font-size:13px;color:rgba(255,255,255,.3)}
+.footer-tagline-bottom{font-size:13px;color:rgba(255,255,255,.25);font-style:italic}
+
+/* ── ANIMATION ── */
+.fade{opacity:0;transform:translateY(20px);transition:opacity .65s ease,transform .65s ease}
+.fade.in{opacity:1;transform:translateY(0)}
+
+@media(max-width:960px){
+  .hero,.split,.roles-grid,.pricing-grid,.testi-grid{grid-template-columns:1fr}
+  .split.reverse{direction:ltr}
+  .feature-grid{grid-template-columns:1fr 1fr}
+  .steps-grid{grid-template-columns:1fr 1fr}
+  .steps-grid::before{display:none}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+  .hero,.section,.split,.pricing-inner,.roles-inner,.steps-section,.testi-section,.cta-section,footer{padding-left:20px;padding-right:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">C</div>
+    <span class="nav-logo-name">CoachOps360</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features" class="nav-link">Features</a>
+    <a href="#how-it-works" class="nav-link">How it works</a>
+    <a href="#roles" class="nav-link">For your team</a>
+    <a href="#pricing" class="nav-link">Pricing</a>
+  </div>
+  <div class="nav-end">
+    <a href="https://coachops360.com/app" class="btn-login">Log in</a>
+    <a href="https://coachops360.com/app" class="btn-demo">Start free →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-eyebrow fade">
+      <span class="hero-eyebrow-pill">New</span>
+      Your team deserves more than annual reviews
+    </div>
+    <h1 class="hero-h1 fade">Every person<br>on your team<br><span class="accent">deserves to grow.</span></h1>
+    <p class="hero-sub fade">CoachOps360 gives every team member clear goals, consistent coaching conversations, and visibility into their own progress — so development happens every week, not just once a year.</p>
+    <div class="hero-actions fade">
+      <a href="https://coachops360.com/app" class="btn-hero-cta">Start developing your team →</a>
+      <a href="#features" class="btn-hero-ghost">See all features</a>
+    </div>
+    <div class="hero-social fade">
+      <span class="stars">★★★★★</span>
+      <span>Trusted by teams in retail, healthcare, tech, and more</span>
+    </div>
+  </div>
+  <div class="hero-img fade">
+    <div class="float-card float-1">
+      <div class="float-icon" style="background:#e6f5f0">✅</div>
+      <div><div class="float-title">Goal completed</div><div class="float-sub">Q2 Revenue — 100%</div></div>
+    </div>
+    <div class="mock-window">
+      <div class="mock-titlebar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#febc2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+        <div class="mock-url">coachops360.com/app</div>
+      </div>
+      <div class="mock-body">
+        <div class="mock-topbar">
+          <div class="mock-greeting">Good morning, team 👋</div>
+          <div class="mock-badge">Team Lead</div>
+        </div>
+        <div class="mock-stats">
+          <div class="mock-stat"><div class="mock-stat-n">12</div><div class="mock-stat-l">Goals</div></div>
+          <div class="mock-stat"><div class="mock-stat-n">8</div><div class="mock-stat-l">Done</div></div>
+          <div class="mock-stat"><div class="mock-stat-n">4</div><div class="mock-stat-l">Members</div></div>
+        </div>
+        <div class="mock-section-title">Your Team</div>
+        <div class="mock-member">
+          <div class="mock-av" style="background:#1f4ddb">JL</div>
+          <div class="mock-minfo"><div class="mock-mname">Jamie Lee</div><div class="mock-mrole">Senior Designer</div></div>
+          <div class="mock-pbar"><div class="mock-pbar-track"><div class="mock-pbar-fill" style="width:75%;background:#1f4ddb"></div></div><div class="mock-pbar-pct">75%</div></div>
+        </div>
+        <div class="mock-member">
+          <div class="mock-av" style="background:#0d7a55">MK</div>
+          <div class="mock-minfo"><div class="mock-mname">Marcus Kim</div><div class="mock-mrole">Sales Lead</div></div>
+          <div class="mock-pbar"><div class="mock-pbar-track"><div class="mock-pbar-fill" style="width:52%;background:#0d7a55"></div></div><div class="mock-pbar-pct">52%</div></div>
+        </div>
+        <div class="mock-member">
+          <div class="mock-av" style="background:#c96f00">SR</div>
+          <div class="mock-minfo"><div class="mock-mname">Sofia R.</div><div class="mock-mrole">Operations</div></div>
+          <div class="mock-pbar"><div class="mock-pbar-track"><div class="mock-pbar-fill" style="width:88%;background:#c96f00"></div></div><div class="mock-pbar-pct">88%</div></div>
+        </div>
+        <div class="mock-session">
+          <div class="mock-session-icon">📅</div>
+          <div class="mock-session-info">
+            <div class="mock-session-title">1:1 with Jamie Lee</div>
+            <div class="mock-session-time">Tomorrow · 10:00 AM · In 1 day</div>
+          </div>
+          <div class="mock-session-badge">Upcoming</div>
+        </div>
+      </div>
+    </div>
+    <div class="float-card float-2">
+      <div class="float-icon" style="background:#f3eeff">📝</div>
+      <div><div class="float-title">Note added</div><div class="float-sub">1:1 with Marcus · Just now</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGOS -->
+<div class="logos-bar">
+  <div class="logos-bar-inner">
+    <span class="logos-label">Helping teams grow across</span>
+    <div class="logos-divider"></div>
+    <span class="logo-item">Retail</span>
+    <span class="logo-item">Healthcare</span>
+    <span class="logo-item">Technology</span>
+    <span class="logo-item">Finance</span>
+    <span class="logo-item">Education</span>
+    <span class="logo-item">Non-Profit</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="fade">
+    <p class="section-eyebrow">Development that works for every person</p>
+    <h2 class="section-h2">Everything your team<br>needs to grow together</h2>
+    <p class="section-sub">CoachOps360 gives every team member a clear path forward — with goals they understand, coaching they can reference, and progress they can see. Not just at review time. Every week.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feat-card fade">
+      <div class="feat-icon" style="background:#eef2fd">🎯</div>
+      <h3 class="feat-title">Goals Every Person Understands</h3>
+      <p class="feat-desc">Every team member gets weekly, monthly, and annual goals broken down into simple key results they can check off. No more wondering what success looks like — it's right there.</p>
+    </div>
+    <div class="feat-card fade">
+      <div class="feat-icon" style="background:#e6f5f0">📅</div>
+      <h3 class="feat-title">1:1s That Build Real Relationships</h3>
+      <p class="feat-desc">Schedule regular coaching sessions and let your team add their own agenda items. When people come prepared with what they want to discuss, 1:1s stop being status updates and start building trust.</p>
+    </div>
+    <div class="feat-card fade">
+      <div class="feat-icon" style="background:#fef3e0">📝</div>
+      <h3 class="feat-title">A Coaching History That Compounds</h3>
+      <p class="feat-desc">Every conversation logged becomes a building block. Rich coaching notes with action items, feedback, and recognition create a full growth story for each person — one session at a time.</p>
+    </div>
+    <div class="feat-card fade">
+      <div class="feat-icon" style="background:#fce7f3">✅</div>
+      <h3 class="feat-title">Keep Everyone Growing, Even in Slow Periods</h3>
+      <p class="feat-desc">Slow periods don't have to be wasted. Assign purposeful tasks each team member can pick up, check off, and add notes to. Development keeps moving even when business slows down.</p>
+    </div>
+    <div class="feat-card fade">
+      <div class="feat-icon" style="background:#f3eeff">📄</div>
+      <h3 class="feat-title">Annual Reviews Accessible to Everyone</h3>
+      <p class="feat-desc">Upload annual reviews to each person's profile so they always have access to their own performance history. No more chasing down PDFs. Every team member owns their record.</p>
+    </div>
+    <div class="feat-card fade">
+      <div class="feat-icon" style="background:#e6f5f0">👤</div>
+      <h3 class="feat-title">Every Team Member Has Their Own Dashboard</h3>
+      <p class="feat-desc">Each person on your team logs in to see their own goals, coaching notes, upcoming 1:1s, tasks, and reviews — private to them. Their development, organized and always within reach.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SPLIT: Team lead view -->
+<div class="split">
+  <div class="split-visual fade">
+    <div class="screen-mock">
+      <div class="screen-header">
+        <div class="screen-dots">
+          <div class="screen-dot" style="background:#ff5f57"></div>
+          <div class="screen-dot" style="background:#febc2e"></div>
+          <div class="screen-dot" style="background:#28c840"></div>
+        </div>
+        <span class="screen-title">Team Dashboard</span>
+      </div>
+      <div class="screen-body">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div style="width:36px;height:36px;border-radius:9px;background:#1f4ddb;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:white">JL</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink)">Jamie Lee</div>
+            <div style="font-size:11px;color:var(--ink3)">Senior Designer · 3 goals · 2 sessions</div>
+          </div>
+          <span style="margin-left:auto;font-size:10px;font-weight:700;background:var(--bluebg);color:var(--blue);padding:3px 9px;border-radius:100px">Active</span>
+        </div>
+        <div style="background:var(--off);border-radius:10px;padding:14px;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Q3 Annual Goal</div>
+          <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">Increase design output by 30%</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px">
+            <span style="font-size:10px;padding:2px 8px;background:var(--bluebg);color:var(--blue);border-radius:5px;font-weight:600">Jamie Lee</span>
+            <span style="font-size:10px;padding:2px 8px;background:var(--off2);color:var(--ink3);border-radius:5px;font-weight:600">Due Dec 31</span>
+            <span style="font-size:10px;padding:2px 8px;background:var(--greenbg);color:var(--green);border-radius:5px;font-weight:600">2/3 key results</span>
+          </div>
+          <div style="height:4px;background:var(--off3);border-radius:2px;overflow:hidden"><div style="width:67%;height:100%;background:var(--blue);border-radius:2px"></div></div>
+        </div>
+        <div style="background:var(--off);border-radius:10px;padding:14px">
+          <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Last coaching note</div>
+          <div style="font-size:12px;color:var(--ink2);line-height:1.6">Discussed Q3 progress. Jamie is on track with the Figma redesign. Action item: present mockups at next team meeting.</div>
+          <div style="font-size:10px;color:var(--ink3);margin-top:8px">Jun 5, 2026 · 1:1 Session</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="fade">
+    <div class="tag" style="background:var(--bluebg);color:var(--blue);margin-bottom:20px"><span>🌱</span> Team Lead View</div>
+    <h2 class="section-h2" style="font-size:38px">Give your team<br>a clear path forward.</h2>
+    <p class="section-sub" style="margin-bottom:28px">When every goal, coaching conversation, and session is captured in one place, your team stops getting developed reactively and starts growing with real purpose and direction.</p>
+    <div class="check-list">
+      <div class="check-item"><div class="check-ico" style="background:var(--bluebg);color:var(--blue)">✓</div>Every team member has goals they understand and can track</div>
+      <div class="check-item"><div class="check-ico" style="background:var(--bluebg);color:var(--blue)">✓</div>Every coaching conversation builds on the last</div>
+      <div class="check-item"><div class="check-ico" style="background:var(--bluebg);color:var(--blue)">✓</div>Regular 1:1s that feel personal and productive</div>
+      <div class="check-item"><div class="check-ico" style="background:var(--bluebg);color:var(--blue)">✓</div>Annual reviews accessible to every team member anytime</div>
+      <div class="check-item"><div class="check-ico" style="background:var(--bluebg);color:var(--blue)">✓</div>Purposeful tasks that keep skills growing between sessions</div>
+    </div>
+  </div>
+</div>
+
+<!-- SPLIT: Employee view -->
+<div class="split reverse" style="background:var(--off);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="fade">
+    <div class="tag" style="background:var(--greenbg);color:var(--green);margin-bottom:20px"><span>👤</span> Team Member View</div>
+    <h2 class="section-h2" style="font-size:38px">Every team member<br>owns their journey.</h2>
+    <p class="section-sub" style="margin-bottom:28px">When people can see their goals, read their coaching notes, and track their own progress — they stop waiting to be developed and start driving it themselves. That's what ownership looks like.</p>
+    <div class="check-list">
+      <div class="check-item"><div class="check-ico" style="background:var(--greenbg);color:var(--green)">✓</div>See your goals and track your key results</div>
+      <div class="check-item"><div class="check-ico" style="background:var(--greenbg);color:var(--green)">✓</div>Read every coaching note from every session</div>
+      <div class="check-item"><div class="check-ico" style="background:var(--greenbg);color:var(--green)">✓</div>Add your own topics before every 1:1</div>
+      <div class="check-item"><div class="check-ico" style="background:var(--greenbg);color:var(--green)">✓</div>Check off tasks and add your own progress notes</div>
+      <div class="check-item"><div class="check-ico" style="background:var(--greenbg);color:var(--green)">✓</div>Read and download your own annual reviews</div>
+    </div>
+  </div>
+  <div class="split-visual fade">
+    <div class="screen-mock">
+      <div class="screen-header">
+        <div class="screen-dots">
+          <div class="screen-dot" style="background:#ff5f57"></div>
+          <div class="screen-dot" style="background:#febc2e"></div>
+          <div class="screen-dot" style="background:#28c840"></div>
+        </div>
+        <span class="screen-title">My Dashboard — Lisa B.</span>
+      </div>
+      <div class="screen-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+          <div style="background:var(--off);border:1px solid var(--border);border-radius:9px;padding:11px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--ink)">5</div><div style="font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px">My Goals</div></div>
+          <div style="background:var(--off);border:1px solid var(--border);border-radius:9px;padding:11px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--green)">3</div><div style="font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px">Complete</div></div>
+          <div style="background:var(--off);border:1px solid var(--border);border-radius:9px;padding:11px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--blue)">2</div><div style="font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px">Upcoming 1:1s</div></div>
+        </div>
+        <div style="background:var(--bluelight);border:1px solid rgba(31,77,219,.15);border-radius:10px;padding:13px;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">My Next 1:1</div>
+          <div style="font-size:13px;font-weight:600;color:var(--ink)">Thu, Jun 11 · 9:00 AM</div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:3px">📍 Office · In 2 days</div>
+          <div style="margin-top:10px;font-size:11px;font-weight:600;color:var(--blue)">My agenda items (2)</div>
+          <div style="font-size:11px;color:var(--ink2);margin-top:4px">• Discuss contract library project<br>• Ask about Q3 bonus structure</div>
+        </div>
+        <div style="background:var(--off);border:1px solid var(--border);border-radius:10px;padding:13px">
+          <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Latest coaching note</div>
+          <div style="display:inline-block;font-size:9px;font-weight:700;background:var(--greenbg);color:var(--green);padding:2px 8px;border-radius:5px;margin-bottom:6px;text-transform:uppercase">Recognition</div>
+          <div style="font-size:12px;color:var(--ink2);line-height:1.6">Outstanding work on the Salesforce implementation. Lisa completed all modules ahead of schedule.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="steps-section" id="how-it-works">
+  <div style="text-align:center" class="fade">
+    <p class="section-eyebrow">How it works</p>
+    <h2 class="section-h2">Your whole team developing from day one</h2>
+    <p class="section-sub" style="margin:0 auto">No complex setup. No IT required. Everyone on your team is developing from day one.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step fade"><div class="step-num">1</div><h3 class="step-title">Create your team space</h3><p class="step-desc">Create a shared space for your whole team in under 2 minutes. Free to start, no credit card needed.</p></div>
+    <div class="step fade"><div class="step-num">2</div><h3 class="step-title">Bring your people in</h3><p class="step-desc">Add each person with their role and a simple 4-digit PIN. They get their own private dashboard instantly.</p></div>
+    <div class="step fade"><div class="step-num">3</div><h3 class="step-title">Set goals that mean something</h3><p class="step-desc">Set goals with key results for each person, schedule your first 1:1s, and upload job descriptions. Everyone has a clear path from the start.</p></div>
+    <div class="step fade"><div class="step-num">4</div><h3 class="step-title">Watch your team grow</h3><p class="step-desc">Share the workspace ID and every team member logs in to their own private dashboard. Goals, coaching notes, tasks, and reviews — all waiting for them.</p></div>
+  </div>
+</section>
+
+<!-- ROLES -->
+<div class="roles-bg" id="roles">
+  <div class="roles-inner">
+    <div style="text-align:center" class="fade">
+      <p class="section-eyebrow">Two views. One shared goal: growth.</p>
+      <h2 class="section-h2">Built for the people<br>doing the developing<br>and the people being developed</h2>
+    </div>
+    <div class="roles-grid">
+      <div class="role-card fade">
+        <div class="role-tag" style="background:var(--bluebg);color:var(--blue)"><span>🌱</span> Team Lead</div>
+        <h3 class="role-h3">Develop your people with a system</h3>
+        <p class="role-p">Stop relying on memory and scattered notes. CoachOps360 gives you a full picture of each person's journey — goals, coaching history, sessions, and reviews — so every conversation builds on the last.</p>
+        <div class="role-list">
+          <div class="role-item"><div class="role-check" style="background:var(--bluebg);color:var(--blue)">✓</div>Set and track goals for every team member</div>
+          <div class="role-item"><div class="role-check" style="background:var(--bluebg);color:var(--blue)">✓</div>Log coaching notes that build a growth story</div>
+          <div class="role-item"><div class="role-check" style="background:var(--bluebg);color:var(--blue)">✓</div>Run structured 1:1s with shared agendas</div>
+          <div class="role-item"><div class="role-check" style="background:var(--bluebg);color:var(--blue)">✓</div>Upload and share annual performance reviews</div>
+          <div class="role-item"><div class="role-check" style="background:var(--bluebg);color:var(--blue)">✓</div>Keep the team growing between sessions</div>
+          <div class="role-item"><div class="role-check" style="background:var(--bluebg);color:var(--blue)">✓</div>Give everyone clarity on what great looks like</div>
+        </div>
+      </div>
+      <div class="role-card fade">
+        <div class="role-tag" style="background:var(--greenbg);color:var(--green)"><span>👤</span> Team Member</div>
+        <h3 class="role-h3">See your growth. Own your journey.</h3>
+        <p class="role-p">CoachOps360 gives every team member a private dashboard where they can see their goals, read every coaching note, track their progress, and add their voice to every 1:1. Development stops happening to them and starts happening with them.</p>
+        <div class="role-list">
+          <div class="role-item"><div class="role-check" style="background:var(--greenbg);color:var(--green)">✓</div>Clear goals they set with their team lead</div>
+          <div class="role-item"><div class="role-check" style="background:var(--greenbg);color:var(--green)">✓</div>Full coaching history — readable anytime, anywhere</div>
+          <div class="role-item"><div class="role-check" style="background:var(--greenbg);color:var(--green)">✓</div>Add your own topics to every 1:1</div>
+          <div class="role-item"><div class="role-check" style="background:var(--greenbg);color:var(--green)">✓</div>Check off tasks and add their own progress notes</div>
+          <div class="role-item"><div class="role-check" style="background:var(--greenbg);color:var(--green)">✓</div>Read and download their own annual reviews</div>
+          <div class="role-item"><div class="role-check" style="background:var(--greenbg);color:var(--green)">✓</div>See their job description and what great looks like</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="pricing-section" id="pricing">
+  <div class="pricing-glow"></div>
+  <div class="pricing-glow2"></div>
+  <div class="pricing-inner">
+    <div class="pricing-head fade">
+      <p class="pricing-eyebrow">Pricing that grows with your team</p>
+      <h2 class="pricing-h2">Start developing your team today.</h2>
+      <p class="pricing-sub">Every plan includes goals, coaching notes, 1:1 scheduling, task tracking, and annual reviews. First month completely free — no credit card required.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pc fade">
+        <p class="pc-name">Starter</p>
+        <div class="pc-price">$19</div>
+        <p class="pc-period">/month after trial</p>
+        <p class="pc-trial">✓ First month free</p>
+        <div class="pc-div"></div>
+        <div class="pc-list">
+          <div class="pc-item"><span class="pc-check">✓</span>1 Team lead</div>
+          <div class="pc-item"><span class="pc-check">✓</span>Up to 5 team members</div>
+          <div class="pc-item"><span class="pc-check">✓</span>Goals & key results</div>
+          <div class="pc-item"><span class="pc-check">✓</span>Coaching notes</div>
+          <div class="pc-item"><span class="pc-check">✓</span>1:1 scheduling</div>
+          <div class="pc-item"><span class="pc-check">✓</span>Downtime tasks</div>
+        </div>
+        <a href="https://coachops360.com/app" class="btn-pc btn-pc-outline">Start free trial →</a>
+      </div>
+      <div class="pc popular fade">
+        <div class="pc-badge">Most popular</div>
+        <p class="pc-name-dark">Growth</p>
+        <div class="pc-price-dark">$49</div>
+        <p class="pc-period-dark">/month after trial</p>
+        <p class="pc-trial-dark">✓ First month free</p>
+        <div class="pc-div-dark"></div>
+        <div class="pc-list">
+          <div class="pc-item-dark"><span class="pc-check-dark">✓</span>1 Team lead</div>
+          <div class="pc-item-dark"><span class="pc-check-dark">✓</span>Up to 15 team members</div>
+          <div class="pc-item-dark"><span class="pc-check-dark">✓</span>Everything in Starter</div>
+          <div class="pc-item-dark"><span class="pc-check-dark">✓</span>Team member PIN login</div>
+          <div class="pc-item-dark"><span class="pc-check-dark">✓</span>Member agenda items</div>
+          <div class="pc-item-dark"><span class="pc-check-dark">✓</span>Employee dashboards</div>
+        </div>
+        <a href="https://coachops360.com/app" class="btn-pc btn-pc-solid">Start free trial →</a>
+      </div>
+      <div class="pc fade">
+        <p class="pc-name">Pro</p>
+        <div class="pc-price">$99</div>
+        <p class="pc-period">/month after trial</p>
+        <p class="pc-trial">✓ First month free</p>
+        <div class="pc-div"></div>
+        <div class="pc-list">
+          <div class="pc-item"><span class="pc-check">✓</span>3 Team leads</div>
+          <div class="pc-item"><span class="pc-check">✓</span>Unlimited team members</div>
+          <div class="pc-item"><span class="pc-check">✓</span>Everything in Growth</div>
+          <div class="pc-item"><span class="pc-check">✓</span>Multiple workspaces</div>
+          <div class="pc-item"><span class="pc-check">✓</span>Annual review uploads</div>
+          <div class="pc-item"><span class="pc-check">✓</span>Full coaching history</div>
+        </div>
+        <a href="https://coachops360.com/app" class="btn-pc btn-pc-outline">Start free trial →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section class="testi-section">
+  <div style="text-align:center" class="fade">
+    <p class="section-eyebrow">What growing teams are saying</p>
+    <h2 class="section-h2">Real teams. Real growth.</h2>
+  </div>
+  <div class="testi-grid">
+    <div class="testi fade">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-q">Our 1:1s used to feel like status updates. Now my team comes in with their own agenda items and we actually talk about growth. CoachOps360 completely changed the dynamic.</p>
+      <div class="testi-author"><div class="testi-av" style="background:#1f4ddb">PM</div><div><div class="testi-name">Pat M.</div><div class="testi-title">Sales Team Lead</div></div></div>
+    </div>
+    <div class="testi fade">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-q">Every person on my team can see their own goals and read every coaching note we've ever had. They reference them on their own. That's ownership — and it didn't happen before.</p>
+      <div class="testi-author"><div class="testi-av" style="background:#0d7a55">LB</div><div><div class="testi-name">Lisa B.</div><div class="testi-title">Operations Lead</div></div></div>
+    </div>
+    <div class="testi fade">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-q">We went from annual reviews being the only development conversation to weekly check-ins, goal tracking, and a coaching history for every person. Engagement went through the roof.</p>
+      <div class="testi-author"><div class="testi-av" style="background:#c96f00">EL</div><div><div class="testi-name">Ethan L.</div><div class="testi-title">Team Lead</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-inner fade">
+    <h2 class="cta-h2">Your team deserves better than annual reviews.</h2>
+    <p class="cta-sub">Give every person clear goals, consistent coaching, and visibility into their own growth. CoachOps360 makes continuous team development simple — start free for 30 days.</p>
+    <div class="cta-actions">
+      <a href="https://coachops360.com/app" class="btn-hero-cta" style="font-size:16px;padding:16px 32px">Start free for 30 days →</a>
+      <a href="https://coachops360.com/app" class="btn-hero-ghost" style="font-size:16px;padding:16px 32px">Log in</a>
+    </div>
+    <p class="cta-note">No credit card required · Cancel anytime · First month free on all plans</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">CoachOps360</div>
+        <p class="footer-tagline">The team development platform that makes continuous growth the norm, not the exception.</p>
+      </div>
+      <div>
+        <p class="footer-col-label">Product</p>
+        <div class="footer-links">
+          <a href="#features" class="footer-link">Features</a>
+          <a href="#pricing" class="footer-link">Pricing</a>
+          <a href="#how-it-works" class="footer-link">How it works</a>
+          <a href="#roles" class="footer-link">For your team</a>
+        </div>
+      </div>
+      <div>
+        <p class="footer-col-label">Account</p>
+        <div class="footer-links">
+          <a href="https://coachops360.com/app" class="footer-link">Log in</a>
+          <a href="https://coachops360.com/app" class="footer-link">Sign up free</a>
+          <a href="https://coachops360.com/app" class="footer-link">Pricing</a>
+        </div>
+      </div>
+      <div>
+        <p class="footer-col-label">Company</p>
+        <div class="footer-links">
+          <a href="#" class="footer-link">About</a>
+          <a href="#" class="footer-link">Contact</a>
+          <a href="#" class="footer-link">Privacy Policy</a>
+          <a href="#" class="footer-link">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 CoachOps360. All rights reserved.</span>
+      <span class="footer-tagline-bottom">Every person. Every week. Growing.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const io = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('in'), i * 70);
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
