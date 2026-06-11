@@ -1079,8 +1079,8 @@ async function redirectToCheckout(planKey) {
     const result = await stripe.redirectToCheckout({
       lineItems: [{ price: plan.id, quantity: 1 }],
       mode: 'subscription',
-      successUrl: 'https://coachops360.com?checkout=success&plan=' + planKey,
-      cancelUrl: 'https://coachops360.com?checkout=cancel',
+      successUrl: 'https://coachops360.com/app?checkout=success&plan=' + planKey,
+      cancelUrl: 'https://coachops360.com/app?checkout=cancel',
       customerEmail: currentUser?.email || undefined,
       subscriptionData: {
         trial_period_days: 30,
@@ -1582,6 +1582,79 @@ function rSS(c,a){
   </div>${renderList(displayList,emptyMsg)}`;
 }
 function setSessView(v){sessView=v;rSS(document.getElementById('content'),document.getElementById('topbar-actions'));}
+
+// ══════════════════════════════════════════════════════
+// CALENDAR EXPORT HELPERS
+// ══════════════════════════════════════════════════════
+function formatICSDate(dateStr, timeStr) {
+  // Returns YYYYMMDDTHHmmss format
+  const d = new Date(dateStr + 'T' + (timeStr || '09:00') + ':00');
+  const pad = n => String(n).padStart(2,'0');
+  return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) +
+    'T' + pad(d.getHours()) + pad(d.getMinutes()) + '00';
+}
+
+function formatICSDateEnd(dateStr, timeStr) {
+  // Add 1 hour for end time
+  const d = new Date(dateStr + 'T' + (timeStr || '09:00') + ':00');
+  d.setHours(d.getHours() + 1);
+  const pad = n => String(n).padStart(2,'0');
+  return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) +
+    'T' + pad(d.getHours()) + pad(d.getMinutes()) + '00';
+}
+
+function downloadICS(s) {
+  const title = encodeURIComponent('1:1 with ' + s.member_name);
+  const start = formatICSDate(s.session_date, s.session_time);
+  const end = formatICSDateEnd(s.session_date, s.session_time);
+  const desc = [
+    s.agenda ? 'Agenda: ' + s.agenda : '',
+    s.member_agenda ? 'Member agenda: ' + s.member_agenda.split('\n').join(', ') : ''
+  ].filter(Boolean).join('\n');
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//CoachOps360//EN',
+    'BEGIN:VEVENT',
+    'UID:' + s.id + '@coachops360.com',
+    'DTSTART:' + start,
+    'DTEND:' + end,
+    'SUMMARY:1:1 with ' + s.member_name,
+    'DESCRIPTION:' + desc.replace(/\n/g, '\\n'),
+    s.location ? 'LOCATION:' + s.location : '',
+    'STATUS:CONFIRMED',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].filter(Boolean).join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '1on1-' + s.member_name.replace(/\s+/g,'-') + '-' + s.session_date + '.ics';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Calendar event downloaded!');
+}
+
+function addToGoogleCalendar(s) {
+  const title = encodeURIComponent('1:1 with ' + s.member_name);
+  const start = formatICSDate(s.session_date, s.session_time).replace(/[:-]/g,'');
+  const end = formatICSDateEnd(s.session_date, s.session_time).replace(/[:-]/g,'');
+  const details = encodeURIComponent([
+    s.agenda ? 'Agenda: ' + s.agenda : '',
+    s.member_agenda ? 'Member items: ' + s.member_agenda.split('\n').filter(Boolean).join(', ') : ''
+  ].filter(Boolean).join('\n'));
+  const location = encodeURIComponent(s.location || '');
+  const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+    '&text=' + title +
+    '&dates=' + start + '/' + end +
+    '&details=' + details +
+    '&location=' + location;
+  window.open(url, '_blank');
+}
+
 function renderSessCard(s,editable){
   const diff=daysUntil(s.session_date),isToday=diff===0,isPast=diff<0;
   const[cbg,cfg,typeLabel]=sessTypeStyle(s.session_type);
@@ -1608,9 +1681,19 @@ function renderSessCard(s,editable){
       '<ul style="padding-left:16px;margin:0">' + s.member_agenda.split('\n').filter(Boolean).map(i=>'<li style="font-size:12px;color:var(--t2);margin-bottom:3px">'+i+'</li>').join('') + '</ul>' +
       '</div>'
     ):''}
-    <div class="sess-footer">
-      ${s.location?`<span style="font-size:11px;font-weight:500;color:var(--t3)">📍 ${s.location}</span>`:'<span></span>'}
-      ${editable?`<div style="display:flex;gap:6px"><button class="btn btn-ghost btn-xs" onclick="oSessModal('${s.id}')">Edit</button><button class="btn btn-danger btn-xs" onclick="deleteSess('${s.id}')">✕</button></div>`:''}
+    <div class="sess-footer" style="flex-direction:column;align-items:flex-start;gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+        ${s.location?`<span style="font-size:11px;font-weight:500;color:var(--t3)">📍 ${s.location}</span>`:'<span></span>'}
+        ${editable?`<div style="display:flex;gap:6px"><button class="btn btn-ghost btn-xs" onclick="oSessModal('${s.id}')">Edit</button><button class="btn btn-danger btn-xs" onclick="deleteSess('${s.id}')">✕</button></div>`:''}
+      </div>
+      <div style="display:flex;gap:8px;width:100%">
+        <button onclick="downloadICS(sessions.find(x=>x.id==='${s.id}'))" class="btn btn-ghost btn-xs" style="flex:1;justify-content:center;gap:5px;font-size:10px;padding:6px 8px">
+          📅 Add to Outlook
+        </button>
+        <button onclick="addToGoogleCalendar(sessions.find(x=>x.id==='${s.id}'))" class="btn btn-ghost btn-xs" style="flex:1;justify-content:center;gap:5px;font-size:10px;padding:6px 8px">
+          🗓️ Add to Google
+        </button>
+      </div>
     </div>
   </div>`;
 }
