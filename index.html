@@ -333,8 +333,8 @@ select option{background:#0d1120}
 .kr-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px;opacity:0;transition:opacity .15s;padding:0 2px}
 .kr-item:hover .kr-del{opacity:1}
 .kr-del:hover{color:var(--rd)}
-.kr-add-row{display:flex;gap:8px;margin-top:10px;align-items:center}
-.kr-input{flex:1 !important;padding:10px 14px !important;font-size:13px !important;font-weight:500 !important;border-radius:8px !important;min-height:unset !important;height:40px !important;resize:none !important;width:100% !important;box-sizing:border-box !important}
+.kr-add-row{display:flex;flex-direction:column;gap:8px;margin-top:12px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.08)}
+.kr-input{padding:10px 14px !important;font-size:13px !important;font-weight:500 !important;border-radius:8px !important;min-height:unset !important;height:40px !important;resize:none !important;width:100% !important;box-sizing:border-box !important;display:block !important}
 .kr-pbar{height:2px;background:rgba(255,255,255,.07);border-radius:1px;overflow:hidden;margin-top:6px}
 .kr-pfill{height:100%;border-radius:1px;transition:width .4s ease}
 .goal-kr-summary{font-size:10px;font-weight:600;color:var(--t3);margin-top:3px}
@@ -1320,8 +1320,8 @@ function goalRowHTML(x, editable=true, readonly=false) {
           ${editable?`<button class="kr-del" onclick="deleteKR('${x.id}',${i})">✕</button>`:''}
         </div>`).join('')}
         ${editable?`<div class="kr-add-row">
-          <input type="text" class="kr-input" id="kr-input-${x.id}" placeholder="Add key result..." onkeydown="if(event.key==='Enter')addKR('${x.id}')">
-          <button class="btn btn-primary btn-sm" onclick="addKR('${x.id}')" style="height:40px;flex-shrink:0;padding:0 16px">+ Add</button>
+          <input type="text" class="kr-input" id="kr-input-${x.id}" placeholder="Type a key result and press Enter...">
+          <button class="btn btn-primary btn-sm" onclick="addKR('${x.id}')" style="width:100%;height:40px;justify-content:center">+ Add Key Result</button>
         </div>`:''}
       </div>
     </div>
@@ -1336,10 +1336,22 @@ function toggleKRs(goalId) {
   const open = el.style.display !== 'none';
   el.style.display = open ? 'none' : 'block';
   if (btn) btn.innerHTML = (open ? '▸ ' : '▾ ') + btn.innerHTML.slice(2);
+  // Bind enter key on input when opened
+  if (!open) {
+    const input = document.getElementById('kr-input-' + goalId);
+    if (input && !input.dataset.bound) {
+      input.dataset.bound = '1';
+      input.addEventListener('keydown', e => { if(e.key==='Enter') addKR(goalId); });
+    }
+  }
 }
 
 async function addKR(goalId) {
   const input = document.getElementById('kr-input-' + goalId);
+  if (input && !input.dataset.bound) {
+    input.dataset.bound = '1';
+    input.addEventListener('keydown', e => { if(e.key==='Enter') addKR(goalId); });
+  }
   const text = input?.value?.trim();
   if (!text) return;
   const g = goals.find(x=>x.id===goalId); if(!g) return;
