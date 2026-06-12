@@ -994,16 +994,26 @@ async function submitAuth() {
 
 async function signOut() {
   if (currentEmployee) {
-    // Employee logout — just clear state
     currentEmployee = null; empWorkspace = null;
     workspace = null; members=[]; goals=[]; tasks=[]; sessions=[]; jobs=[];
     setLoginRole('employee');
     showScreen('auth-screen');
     return;
   }
-  await sb.auth.signOut();
+  // Clear everything before showing auth screen
+  try { await sb.auth.signOut(); } catch(e) {}
+  // Clear saved session from localStorage
+  localStorage.removeItem('sb_session');
+  sb._session = null;
   currentUser = null; workspace = null;
   members=[]; goals=[]; tasks=[]; sessions=[]; jobs=[];
+  // Reset auth form to sign in mode
+  setAuthMode('signin');
+  // Clear any error/status messages
+  const errEl = document.getElementById('auth-err');
+  const okEl = document.getElementById('auth-ok');
+  if (errEl) { errEl.classList.remove('show'); errEl.textContent=''; errEl.style.background=''; errEl.style.color=''; }
+  if (okEl) { okEl.classList.remove('show'); okEl.textContent=''; }
   showScreen('auth-screen');
 }
 
