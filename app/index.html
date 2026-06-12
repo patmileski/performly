@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CoachOps360</title>
-<script src="https://js.stripe.com/v3/"></script>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <!-- Supabase via direct fetch - no library needed -->
 <style>
@@ -633,9 +632,9 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // ── STRIPE CONFIG ─────────────────────────────────────
 const STRIPE_PK = 'pk_live_51TZy5Y3vtv7KGYjkb9X5fYf1fFuP9Dnt2IEhKFguAWcbqdiLrIGiZWDj2YlM6BB0wavAlU66mCDB10q8bpWMjsL400RsD2Oqsc';
 const STRIPE_PRICES = {
-  starter: { id: 'price_1TcACT3vtv7KGYjk7zObexSc', name: 'Starter', price: 19, members: 5 },
-  growth:  { id: 'price_1TcACT3vtv7KGYjkTWOopiYx', name: 'Growth',  price: 49, members: 15 },
-  pro:     { id: 'price_1TcACW3vtv7KGYjk8CT2JuUn', name: 'Pro',     price: 99, members: 999 }
+  starter: { id: 'price_1TcACT3vtv7KGYjk7zObexSc', name: 'Starter', price: 19, members: 5,  paymentLink: 'https://buy.stripe.com/00waEQ3wr2XJ90R9ZM9sk00' },
+  growth:  { id: 'price_1TcACT3vtv7KGYjkTWOopiYx', name: 'Growth',  price: 49, members: 15, paymentLink: 'https://buy.stripe.com/4gM8wIc2X69V3Gx4Fs9sk01' },
+  pro:     { id: 'price_1TcACW3vtv7KGYjk8CT2JuUn', name: 'Pro',     price: 99, members: 999,paymentLink: 'https://buy.stripe.com/dRmdR28QL1TF4KB1tg9sk02' }
 };
 
 // ── RICH TEXT EDITOR HELPERS ──────────────────────────
@@ -1138,24 +1137,18 @@ async function startCheckout(planKey) {
 async function redirectToCheckout(planKey) {
   const plan = STRIPE_PRICES[planKey];
   if (!plan) return;
-  showToast('Redirecting to Stripe checkout...');
-  const stripe = Stripe(STRIPE_PK);
-  try {
-    // Pass workspace_id and plan in the success URL so webhook can pick it up
-    const successUrl = 'https://coachops360.com/app?checkout=success&plan=' + planKey + '&workspace=' + (workspace?.id || '');
-    const cancelUrl = 'https://coachops360.com/app?checkout=cancel';
-
-    const result = await stripe.redirectToCheckout({
-      lineItems: [{ price: plan.id, quantity: 1 }],
-      mode: 'subscription',
-      successUrl: successUrl,
-      cancelUrl: cancelUrl,
-      customerEmail: currentUser?.email || undefined,
-    });
-    if (result.error) showToast(result.error.message, true);
-  } catch(e) {
-    showToast('Checkout error: ' + e.message, true);
+  if (!plan.paymentLink) {
+    showToast('Payment link not configured for this plan. Please contact support.', true);
+    return;
   }
+  // Build URL with prefilled email and workspace metadata
+  let url = plan.paymentLink;
+  const params = new URLSearchParams();
+  if (currentUser?.email) params.set('prefilled_email', currentUser.email);
+  params.set('client_reference_id', workspace?.id || '');
+  url += (url.includes('?') ? '&' : '?') + params.toString();
+  showToast('Redirecting to checkout...');
+  setTimeout(() => { window.location.href = url; }, 500);
 }
 
 const SUPERUSER_EMAIL = 'pmileski@gmail.com';
