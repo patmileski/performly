@@ -888,10 +888,39 @@ async function submitAuth() {
     if (error) { errEl.textContent='Signup error: '+error.message; errEl.style.background=''; errEl.style.color=''; errEl.style.borderColor=''; btn.disabled=false; btn.textContent='Create Workspace →'; return; }
     if (!data.user) { errEl.textContent='No user returned from signup. Try signing in instead.'; errEl.style.background=''; errEl.style.color=''; errEl.style.borderColor=''; btn.disabled=false; btn.textContent='Create Workspace →'; return; }
 
-    // STEP 2: Create workspace
+    // STEP 2: Create workspace — use session token from signup for RLS
     errEl.textContent='Step 2: Creating workspace...';
-    const { data: wsData, error: wsError } = await sb.from('workspaces').insert({ name: wsName, owner_id: data.user.id }).select().single();
-    if (wsError) { errEl.textContent='Workspace error: '+wsError.message+' (code: '+wsError.code+')'; errEl.style.background=''; errEl.style.color=''; errEl.style.borderColor=''; btn.disabled=false; btn.textContent='Create Workspace →'; return; }
+    // Get the access token from the signup session
+    const signupToken = data.session?.access_token || null;
+    let wsData, wsError;
+    if (signupToken) {
+      // Use the session token directly so RLS passes
+      const wsRes = await fetch(SUPABASE_URL + '/rest/v1/workspaces', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + signupToken,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({ name: wsName, owner_id: data.user.id })
+      });
+      const wsJson = await wsRes.json();
+      if (!wsRes.ok) {
+        wsError = { message: wsJson.message || wsJson.error || JSON.stringify(wsJson), code: wsJson.code };
+      } else {
+        wsData = Array.isArray(wsJson) ? wsJson[0] : wsJson;
+        // Store session so subsequent calls use it
+        sb._session = data.session;
+        localStorage.setItem('sb_session', JSON.stringify(data.session));
+      }
+    } else {
+      // Fallback: try with anon key (works if RLS is open)
+      const result = await sb.from('workspaces').insert({ name: wsName, owner_id: data.user.id }).select().single();
+      wsData = result.data;
+      wsError = result.error;
+    }
+    if (wsError) { errEl.textContent='Workspace error: '+wsError.message+' (code: '+(wsError.code||'unknown')+')'; errEl.style.background=''; errEl.style.color=''; errEl.style.borderColor=''; btn.disabled=false; btn.textContent='Create Workspace →'; return; }
 
     // STEP 3: Sign in using the session from signup directly
     errEl.textContent='Step 3: Signing in...';
