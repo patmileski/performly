@@ -1109,24 +1109,19 @@ async function startCheckout(planKey) {
 async function redirectToCheckout(planKey) {
   const plan = STRIPE_PRICES[planKey];
   if (!plan) return;
-  showToast('Redirecting to checkout...');
-  // Build Stripe Checkout URL using Payment Links approach
-  // We'll use Stripe's client-only checkout
+  showToast('Redirecting to Stripe checkout...');
   const stripe = Stripe(STRIPE_PK);
   try {
+    // Pass workspace_id and plan in the success URL so webhook can pick it up
+    const successUrl = 'https://coachops360.com/app?checkout=success&plan=' + planKey + '&workspace=' + (workspace?.id || '');
+    const cancelUrl = 'https://coachops360.com/app?checkout=cancel';
+
     const result = await stripe.redirectToCheckout({
       lineItems: [{ price: plan.id, quantity: 1 }],
       mode: 'subscription',
-      successUrl: 'https://coachops360.com/app?checkout=success&plan=' + planKey,
-      cancelUrl: 'https://coachops360.com/app?checkout=cancel',
+      successUrl: successUrl,
+      cancelUrl: cancelUrl,
       customerEmail: currentUser?.email || undefined,
-      subscriptionData: {
-        trial_period_days: 30,
-        metadata: {
-          workspace_id: workspace?.id || '',
-          plan: planKey
-        }
-      }
     });
     if (result.error) showToast(result.error.message, true);
   } catch(e) {
