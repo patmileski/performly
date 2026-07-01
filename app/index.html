@@ -198,7 +198,10 @@ select option{background:#0d1120}
 .spanel{position:fixed;right:0;top:0;bottom:0;width:75vw;min-width:700px;max-width:1200px;background:rgba(11,14,26,.98);backdrop-filter:blur(30px);border-left:1px solid var(--b1);z-index:100;display:flex;flex-direction:column;transform:translateX(110%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow:hidden}
 .spanel.on{transform:translateX(0)}
 .sp-body{flex:1;overflow-y:auto;padding:24px 32px}
-.sp-footer{border-top:1px solid var(--b1);background:rgba(11,14,26,.99);padding:20px 32px;flex-shrink:0}
+
+.sp-footer{border-top:1px solid var(--b1);background:rgba(11,14,26,.99);padding:16px 32px;flex-shrink:0;transition:padding .2s}
+.sp-footer.expanded{padding:24px 32px}
+
 .sp-two-col{display:grid;grid-template-columns:1fr 1fr;gap:0;flex:1;overflow:hidden}
 .sp-left{overflow-y:auto;padding:22px 24px;border-right:1px solid var(--b1)}
 .sp-right{overflow-y:auto;padding:22px 24px}
@@ -1961,41 +1964,55 @@ async function openMemberPanel(memberId){
     <div class="sslbl">Coaching History (${(notes||[]).length})</div>
     <div id="nhist">${renderNotes(notes||[], '${memberId}')}</div>`;
 
-  // STICKY FOOTER — add note form
+  // STICKY FOOTER — collapsed add note button, expands to full editor
   document.getElementById('sp-footer').innerHTML=`
-    <div style="display:grid;grid-template-columns:160px 1fr auto;gap:12px;align-items:start">
-      <div>
-        <label class="flbl2" style="margin-bottom:6px;display:block">Note Type</label>
-        <select id="ntype" style="height:40px">
-          <option value="1on1">1:1 Session</option>
-          <option value="feedback">Feedback</option>
-          <option value="performance">Performance</option>
-          <option value="recognition">Recognition</option>
-          <option value="development">Development</option>
-          <option value="other">Other</option>
-        </select>
+    <div id="note-collapsed" style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:12px;font-weight:600;color:var(--t3)">Add a coaching note...</span>
+      <button class="btn btn-primary btn-sm" onclick="expandNoteEditor('${memberId}')">+ Add Note</button>
+    </div>
+    <div id="note-expanded" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">New Coaching Note</div>
+        <button onclick="collapseNoteEditor()" class="btn btn-ghost btn-sm">✕ Cancel</button>
       </div>
-      <div>
-        <label class="flbl2" style="margin-bottom:6px;display:block">Add Coaching Note</label>
-        <div class="rte-wrap" style="margin:0">
-          <div class="rte-toolbar">
-            <button class="rte-btn" onclick="rte('bold')"><b>B</b></button>
-            <button class="rte-btn" onclick="rte('italic')"><i>I</i></button>
-            <button class="rte-btn" onclick="rte('underline')"><u>U</u></button>
-            <div class="rte-sep"></div>
-            <button class="rte-btn" onclick="rte('formatBlock','h2')">H2</button>
-            <button class="rte-btn" onclick="rte('formatBlock','h3')">H3</button>
-            <button class="rte-btn" onclick="rte('formatBlock','p')">P</button>
-            <div class="rte-sep"></div>
-            <button class="rte-btn" onclick="rte('insertUnorderedList')">• List</button>
-            <button class="rte-btn" onclick="insertTable()">⊞ Table</button>
-            <button class="rte-btn" onclick="clearEditor()" style="color:var(--rd)">✕</button>
-          </div>
-          <div class="rte-editor" id="ntxt" contenteditable="true" data-placeholder="Discussion points, action items, key takeaways..." style="min-height:80px;max-height:160px"></div>
+      <div style="display:flex;gap:12px;margin-bottom:12px;align-items:center">
+        <div>
+          <label class="flbl2" style="margin-bottom:5px;display:block">Note Type</label>
+          <select id="ntype" style="height:36px;min-width:160px">
+            <option value="1on1">1:1 Session</option>
+            <option value="feedback">Feedback</option>
+            <option value="performance">Performance Review</option>
+            <option value="recognition">Recognition</option>
+            <option value="development">Development Plan</option>
+            <option value="other">Other</option>
+          </select>
         </div>
       </div>
-      <div style="padding-top:24px">
-        <button class="btn btn-primary" onclick="saveNote('${memberId}')" style="height:40px;padding:0 20px;white-space:nowrap">+ Add Note</button>
+      <div class="rte-wrap" style="margin:0 0 12px">
+        <div class="rte-toolbar">
+          <button class="rte-btn" onclick="rte('bold')"><b>B</b></button>
+          <button class="rte-btn" onclick="rte('italic')"><i>I</i></button>
+          <button class="rte-btn" onclick="rte('underline')"><u>U</u></button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="rte('formatBlock','h1')">H1</button>
+          <button class="rte-btn" onclick="rte('formatBlock','h2')">H2</button>
+          <button class="rte-btn" onclick="rte('formatBlock','h3')">H3</button>
+          <button class="rte-btn" onclick="rte('formatBlock','p')">P</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="rte('insertUnorderedList')">• List</button>
+          <button class="rte-btn" onclick="rte('insertOrderedList')">1. List</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="insertTable()">⊞ Table</button>
+          <button class="rte-btn" onclick="rte('formatBlock','blockquote')">❝</button>
+          <button class="rte-btn" onclick="rte('insertHorizontalRule')">—</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="clearEditor()" style="color:var(--rd)">✕</button>
+        </div>
+        <div class="rte-editor" id="ntxt" contenteditable="true" data-placeholder="Write your coaching note here — discussion points, action items, key takeaways, feedback..." style="min-height:200px;max-height:340px"></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px">
+        <button onclick="collapseNoteEditor()" class="btn btn-ghost">Cancel</button>
+        <button onclick="saveNote('${memberId}')" class="btn btn-primary" style="padding:10px 28px">Save Note →</button>
       </div>
     </div>`;
 
@@ -2091,6 +2108,21 @@ function editNote(noteId, memberId) {
   });
 }
 
+
+function expandNoteEditor(memberId) {
+  document.getElementById('note-collapsed').style.display = 'none';
+  document.getElementById('note-expanded').style.display = 'block';
+  document.querySelector('.sp-footer').classList.add('expanded');
+  setTimeout(() => document.getElementById('ntxt')?.focus(), 50);
+}
+
+function collapseNoteEditor() {
+  document.getElementById('note-expanded').style.display = 'none';
+  document.getElementById('note-collapsed').style.display = 'flex';
+  document.querySelector('.sp-footer').classList.remove('expanded');
+  const ntxt = document.getElementById('ntxt');
+  if (ntxt) ntxt.innerHTML = '';
+}
 function rteEdit(cmd, val=null) {
   document.getElementById('edit-ntxt')?.focus();
   document.execCommand(cmd, false, val);
@@ -2119,6 +2151,7 @@ async function saveNote(memberId){
   // Reload notes
   const{data:notes}=await sb.from('coaching_notes').select('*').eq('member_id',memberId).order('created_at',{ascending:false});
   document.getElementById('nhist').innerHTML=renderNotes(notes||[], memberId);
+  collapseNoteEditor();
   showToast('Note saved!');
 }
 
