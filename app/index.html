@@ -1983,20 +1983,22 @@ async function openMemberPanel(memberId){
         <div style="font-size:15px;font-weight:800;color:var(--t1);letter-spacing:-.3px">New Coaching Note</div>
         <button onclick="collapseNoteEditor()" class="btn btn-ghost btn-sm">✕ Cancel</button>
       </div>
-      <div style="margin-bottom:12px">
-        <label class="flbl2" style="margin-bottom:6px;display:block">Note Type</label>
-        <select id="ntype" style="height:38px;width:100%">
-          <option value="1on1">1:1 Session</option>
-          <option value="feedback">Feedback</option>
-          <option value="performance">Performance Review</option>
-          <option value="recognition">Recognition</option>
-          <option value="development">Development Plan</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-      <div style="margin-bottom:14px">
-        <label class="flbl2" style="margin-bottom:6px;display:block">Note Title <span style="color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-        <input type="text" id="note-title" placeholder="e.g. Q3 Check-in, Development Plan Review..." style="height:38px;width:100%;box-sizing:border-box">
+      <div style="display:grid;grid-template-columns:160px 1fr;gap:12px;margin-bottom:14px;align-items:end">
+        <div>
+          <label class="flbl2" style="margin-bottom:6px;display:block;font-size:9px">Note Type</label>
+          <select id="ntype" style="height:34px;width:100%;font-size:11px;padding:0 6px">
+            <option value="1on1">1:1 Session</option>
+            <option value="feedback">Feedback</option>
+            <option value="performance">Performance</option>
+            <option value="recognition">Recognition</option>
+            <option value="development">Development</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="flbl2" style="margin-bottom:6px;display:block;font-size:9px">Note Title <span style="color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input type="text" id="note-title" placeholder="e.g. Q3 Check-in, Development Plan..." style="height:34px;width:100%;box-sizing:border-box;font-size:12px">
+        </div>
       </div>
       <div class="rte-wrap" style="margin:0 0 14px">
         <div class="rte-toolbar" style="flex-wrap:nowrap;gap:2px;overflow-x:auto">
