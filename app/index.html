@@ -1993,40 +1993,34 @@ async function openMemberPanel(memberId){
         </div>
       </div>
       <div class="rte-wrap" style="margin:0 0 14px">
-        <div class="rte-toolbar" style="flex-wrap:wrap;gap:3px">
+        <div class="rte-toolbar" style="flex-wrap:nowrap;gap:2px;overflow-x:auto">
           <button class="rte-btn" onclick="rte('bold')" title="Bold"><b>B</b></button>
           <button class="rte-btn" onclick="rte('italic')" title="Italic"><i>I</i></button>
           <button class="rte-btn" onclick="rte('underline')" title="Underline"><u>U</u></button>
           <button class="rte-btn" onclick="rte('strikeThrough')" title="Strikethrough"><s>S</s></button>
           <div class="rte-sep"></div>
-          <button class="rte-btn" onclick="rte('formatBlock','h1')" title="Heading 1">H1</button>
-          <button class="rte-btn" onclick="rte('formatBlock','h2')" title="Heading 2">H2</button>
-          <button class="rte-btn" onclick="rte('formatBlock','h3')" title="Heading 3">H3</button>
-          <button class="rte-btn" onclick="rte('formatBlock','p')" title="Paragraph">¶</button>
+          <button class="rte-btn" onclick="rte('formatBlock','h1')">H1</button>
+          <button class="rte-btn" onclick="rte('formatBlock','h2')">H2</button>
+          <button class="rte-btn" onclick="rte('formatBlock','h3')">H3</button>
+          <button class="rte-btn" onclick="rte('formatBlock','p')">¶</button>
           <div class="rte-sep"></div>
-          <button class="rte-btn" onclick="rte('insertUnorderedList')" title="Bullet list">• List</button>
-          <button class="rte-btn" onclick="rte('insertOrderedList')" title="Numbered list">1. List</button>
+          <button class="rte-btn" onclick="rte('insertUnorderedList')">•</button>
+          <button class="rte-btn" onclick="rte('insertOrderedList')">1.</button>
+          <button class="rte-btn" onclick="insertTable()">⊞</button>
+          <button class="rte-btn" onclick="rte('formatBlock','blockquote')">❝</button>
+          <button class="rte-btn" onclick="rte('insertHorizontalRule')">—</button>
           <div class="rte-sep"></div>
-          <button class="rte-btn" onclick="insertTable()" title="Insert table">⊞ Table</button>
-          <button class="rte-btn" onclick="rte('formatBlock','blockquote')" title="Quote">❝</button>
-          <button class="rte-btn" onclick="rte('insertHorizontalRule')" title="Divider">—</button>
-          <div class="rte-sep"></div>
-          <span title="Text color" style="position:relative;display:inline-flex;align-items:center">
-            <button class="rte-btn" style="gap:3px" title="Text Color">A <input type="color" onchange="rte('foreColor',this.value)" style="width:14px;height:14px;border:none;background:none;cursor:pointer;padding:0;border-radius:2px" title="Pick text color"></button>
-          </span>
-          <span title="Highlight color" style="position:relative;display:inline-flex;align-items:center">
-            <button class="rte-btn" style="gap:3px" title="Highlight">▐ <input type="color" value="#ffff00" onchange="rte('hiliteColor',this.value)" style="width:14px;height:14px;border:none;background:none;cursor:pointer;padding:0;border-radius:2px" title="Pick highlight color"></button>
-          </span>
-          <div class="rte-sep"></div>
-          <select onchange="rte('fontSize',this.value);this.value=''" class="rte-btn" style="font-size:11px;padding:3px 6px;min-width:60px" title="Font size">
+          <label class="rte-btn" title="Text color" style="cursor:pointer;gap:3px">A<input type="color" onchange="rte('foreColor',this.value)" style="width:12px;height:12px;border:none;background:none;cursor:pointer;padding:0;vertical-align:middle"></label>
+          <label class="rte-btn" title="Highlight" style="cursor:pointer;gap:3px">▐<input type="color" value="#ffff00" onchange="rte('hiliteColor',this.value)" style="width:12px;height:12px;border:none;background:none;cursor:pointer;padding:0;vertical-align:middle"></label>
+          <select onchange="rte('fontSize',this.value);this.value=''" class="rte-btn" style="font-size:10px;padding:2px 4px;min-width:52px">
             <option value="">Size</option>
             <option value="1">Small</option>
             <option value="3">Normal</option>
             <option value="5">Large</option>
-            <option value="7">X-Large</option>
+            <option value="7">XL</option>
           </select>
           <div class="rte-sep"></div>
-          <button class="rte-btn" onclick="clearEditor()" style="color:var(--rd)" title="Clear all">✕ Clear</button>
+          <button class="rte-btn" onclick="clearEditor()" style="color:var(--rd);white-space:nowrap">✕</button>
         </div>
         <div class="rte-editor" id="ntxt" contenteditable="true" data-placeholder="Write your coaching note here — discussion points, action items, key takeaways, feedback, goals discussed..." style="min-height:240px;max-height:400px"></div>
       </div>
@@ -2681,7 +2675,6 @@ async function openMemberReviewSection(memberId, memberName) {
   // Show review section in the side panel
   const reviews = await loadReviews(memberId);
   const reviewHTML = `
-    <div class="sslbl">Annual Reviews</div>
     <div id="review-list-${memberId}" style="margin-bottom:16px">${renderReviewList(reviews, true)}</div>
     <div class="upload-zone" id="upload-zone-${memberId}">
       <input type="file" accept=".pdf,.doc,.docx" onchange="uploadReview(event,'${memberId}','${memberName}')">
