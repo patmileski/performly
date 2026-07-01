@@ -1932,35 +1932,35 @@ async function openMemberPanel(memberId){
   const av = document.getElementById('sp-av');
   if (av) { av.textContent = ini(m.name); av.style.background = col(mi); }
 
-  // SCROLLABLE BODY — member info + annual reviews + coaching history
+  // SCROLLABLE BODY — member info, annual reviews section, coaching history
   document.getElementById('sp-body').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--b1)">
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:12px">Member Info</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div style="background:var(--s2);border-radius:9px;padding:12px">
-            <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:4px">Role</div>
-            <div style="font-size:13px;font-weight:600;color:var(--t1)">${m.role||'—'}</div>
-          </div>
-          <div style="background:var(--s2);border-radius:9px;padding:12px">
-            <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:4px">Department</div>
-            <div style="font-size:13px;font-weight:600;color:var(--t1)">${m.department||'—'}</div>
-          </div>
-          <div style="background:var(--s2);border-radius:9px;padding:12px">
-            <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:4px">Start Date</div>
-            <div style="font-size:13px;font-weight:600;color:var(--t1)">${m.start_date||'—'}</div>
-          </div>
-          <div style="background:var(--s2);border-radius:9px;padding:12px">
-            <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:4px">Notes</div>
-            <div style="font-size:13px;font-weight:600;color:var(--pu)">${(notes||[]).length} total</div>
-          </div>
-        </div>
+    <!-- Member Info Row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--b1)">
+      <div style="background:var(--s2);border-radius:10px;padding:14px">
+        <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Role</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">${m.role||'—'}</div>
       </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:12px">Annual Reviews</div>
-        <div id="review-section-${memberId}"></div>
+      <div style="background:var(--s2);border-radius:10px;padding:14px">
+        <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Department</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">${m.department||'—'}</div>
+      </div>
+      <div style="background:var(--s2);border-radius:10px;padding:14px">
+        <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Start Date</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">${m.start_date||'—'}</div>
+      </div>
+      <div style="background:var(--s2);border-radius:10px;padding:14px">
+        <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Coaching Notes</div>
+        <div style="font-size:20px;font-weight:900;color:var(--pu);letter-spacing:-1px">${(notes||[]).length}</div>
       </div>
     </div>
+
+    <!-- Annual Reviews Section -->
+    <div style="margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--b1)">
+      <div class="sslbl">Annual Reviews</div>
+      <div id="review-section-${memberId}"></div>
+    </div>
+
+    <!-- Coaching History -->
     <div class="sslbl">Coaching History (${(notes||[]).length})</div>
     <div id="nhist">${renderNotes(notes||[], '${memberId}')}</div>`;
 
@@ -1971,14 +1971,14 @@ async function openMemberPanel(memberId){
       <button class="btn btn-primary btn-sm" onclick="expandNoteEditor('${memberId}')">+ Add Note</button>
     </div>
     <div id="note-expanded" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div style="font-size:13px;font-weight:700;color:var(--t1)">New Coaching Note</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:800;color:var(--t1);letter-spacing:-.3px">New Coaching Note</div>
         <button onclick="collapseNoteEditor()" class="btn btn-ghost btn-sm">✕ Cancel</button>
       </div>
-      <div style="display:flex;gap:12px;margin-bottom:12px;align-items:center">
-        <div>
-          <label class="flbl2" style="margin-bottom:5px;display:block">Note Type</label>
-          <select id="ntype" style="height:36px;min-width:160px">
+      <div style="display:flex;gap:16px;margin-bottom:14px;align-items:flex-end;flex-wrap:wrap">
+        <div style="flex:0 0 200px">
+          <label class="flbl2" style="margin-bottom:6px;display:block">Note Type</label>
+          <select id="ntype" style="height:38px;width:100%">
             <option value="1on1">1:1 Session</option>
             <option value="feedback">Feedback</option>
             <option value="performance">Performance Review</option>
@@ -1987,32 +1987,55 @@ async function openMemberPanel(memberId){
             <option value="other">Other</option>
           </select>
         </div>
-      </div>
-      <div class="rte-wrap" style="margin:0 0 12px">
-        <div class="rte-toolbar">
-          <button class="rte-btn" onclick="rte('bold')"><b>B</b></button>
-          <button class="rte-btn" onclick="rte('italic')"><i>I</i></button>
-          <button class="rte-btn" onclick="rte('underline')"><u>U</u></button>
-          <div class="rte-sep"></div>
-          <button class="rte-btn" onclick="rte('formatBlock','h1')">H1</button>
-          <button class="rte-btn" onclick="rte('formatBlock','h2')">H2</button>
-          <button class="rte-btn" onclick="rte('formatBlock','h3')">H3</button>
-          <button class="rte-btn" onclick="rte('formatBlock','p')">P</button>
-          <div class="rte-sep"></div>
-          <button class="rte-btn" onclick="rte('insertUnorderedList')">• List</button>
-          <button class="rte-btn" onclick="rte('insertOrderedList')">1. List</button>
-          <div class="rte-sep"></div>
-          <button class="rte-btn" onclick="insertTable()">⊞ Table</button>
-          <button class="rte-btn" onclick="rte('formatBlock','blockquote')">❝</button>
-          <button class="rte-btn" onclick="rte('insertHorizontalRule')">—</button>
-          <div class="rte-sep"></div>
-          <button class="rte-btn" onclick="clearEditor()" style="color:var(--rd)">✕</button>
+        <div style="flex:1;min-width:200px">
+          <label class="flbl2" style="margin-bottom:6px;display:block">Note Title <span style="color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input type="text" id="note-title" placeholder="e.g. Q3 Check-in, Development Plan Review..." style="height:38px;width:100%">
         </div>
-        <div class="rte-editor" id="ntxt" contenteditable="true" data-placeholder="Write your coaching note here — discussion points, action items, key takeaways, feedback..." style="min-height:200px;max-height:340px"></div>
       </div>
-      <div style="display:flex;justify-content:flex-end;gap:10px">
-        <button onclick="collapseNoteEditor()" class="btn btn-ghost">Cancel</button>
-        <button onclick="saveNote('${memberId}')" class="btn btn-primary" style="padding:10px 28px">Save Note →</button>
+      <div class="rte-wrap" style="margin:0 0 14px">
+        <div class="rte-toolbar" style="flex-wrap:wrap;gap:3px">
+          <button class="rte-btn" onclick="rte('bold')" title="Bold"><b>B</b></button>
+          <button class="rte-btn" onclick="rte('italic')" title="Italic"><i>I</i></button>
+          <button class="rte-btn" onclick="rte('underline')" title="Underline"><u>U</u></button>
+          <button class="rte-btn" onclick="rte('strikeThrough')" title="Strikethrough"><s>S</s></button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="rte('formatBlock','h1')" title="Heading 1">H1</button>
+          <button class="rte-btn" onclick="rte('formatBlock','h2')" title="Heading 2">H2</button>
+          <button class="rte-btn" onclick="rte('formatBlock','h3')" title="Heading 3">H3</button>
+          <button class="rte-btn" onclick="rte('formatBlock','p')" title="Paragraph">¶</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="rte('insertUnorderedList')" title="Bullet list">• List</button>
+          <button class="rte-btn" onclick="rte('insertOrderedList')" title="Numbered list">1. List</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="insertTable()" title="Insert table">⊞ Table</button>
+          <button class="rte-btn" onclick="rte('formatBlock','blockquote')" title="Quote">❝</button>
+          <button class="rte-btn" onclick="rte('insertHorizontalRule')" title="Divider">—</button>
+          <div class="rte-sep"></div>
+          <span title="Text color" style="position:relative;display:inline-flex;align-items:center">
+            <button class="rte-btn" style="gap:3px" title="Text Color">A <input type="color" onchange="rte('foreColor',this.value)" style="width:14px;height:14px;border:none;background:none;cursor:pointer;padding:0;border-radius:2px" title="Pick text color"></button>
+          </span>
+          <span title="Highlight color" style="position:relative;display:inline-flex;align-items:center">
+            <button class="rte-btn" style="gap:3px" title="Highlight">▐ <input type="color" value="#ffff00" onchange="rte('hiliteColor',this.value)" style="width:14px;height:14px;border:none;background:none;cursor:pointer;padding:0;border-radius:2px" title="Pick highlight color"></button>
+          </span>
+          <div class="rte-sep"></div>
+          <select onchange="rte('fontSize',this.value);this.value=''" class="rte-btn" style="font-size:11px;padding:3px 6px;min-width:60px" title="Font size">
+            <option value="">Size</option>
+            <option value="1">Small</option>
+            <option value="3">Normal</option>
+            <option value="5">Large</option>
+            <option value="7">X-Large</option>
+          </select>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="clearEditor()" style="color:var(--rd)" title="Clear all">✕ Clear</button>
+        </div>
+        <div class="rte-editor" id="ntxt" contenteditable="true" data-placeholder="Write your coaching note here — discussion points, action items, key takeaways, feedback, goals discussed..." style="min-height:240px;max-height:400px"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:11px;color:var(--t3)">💡 Tip: Use H2 for section headers, • List for action items</div>
+        <div style="display:flex;gap:10px">
+          <button onclick="collapseNoteEditor()" class="btn btn-ghost">Cancel</button>
+          <button onclick="saveNote('${memberId}')" class="btn btn-primary" style="padding:10px 32px;font-size:14px">Save Note →</button>
+        </div>
       </div>
     </div>`;
 
@@ -2145,7 +2168,10 @@ async function saveNote(memberId){
   const el=document.getElementById('ntxt');
   const text=(el.tagName==='TEXTAREA'?el.value:el.innerHTML).trim();
   if(!text||text==='<br>'||text==='<p><br></p>')return;
-  const{data,error}=await sb.from('coaching_notes').insert({workspace_id:workspace.id,member_id:memberId,note_type:document.getElementById('ntype').value,note_text:text}).select().single();
+  const titleEl = document.getElementById('note-title');
+  const noteTitle = titleEl?.value?.trim();
+  const noteTextFull = noteTitle ? '<h2>' + noteTitle + '</h2>' + text : text;
+  const{data,error}=await sb.from('coaching_notes').insert({workspace_id:workspace.id,member_id:memberId,note_type:document.getElementById('ntype').value,note_text:noteTextFull}).select().single();
   if(error){showToast('Error saving note',true);return;}
   if(el.tagName==='TEXTAREA') el.value=''; else el.innerHTML='';
   // Reload notes
