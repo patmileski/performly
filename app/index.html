@@ -384,6 +384,12 @@ select option{background:#0d1120}
 .danger-title{font-size:14px;font-weight:800;color:var(--rd);margin-bottom:4px}
 .danger-sub{font-size:12px;color:var(--t2);margin-bottom:16px;line-height:1.6}
 
+
+.chip-overdue{background:rgba(255,77,109,.15);color:var(--rd);border:1px solid rgba(255,77,109,.25);font-weight:700;animation:pulse-red 2s ease-in-out infinite}
+.chip-due-soon{background:rgba(255,184,48,.12);color:var(--am);border:1px solid rgba(255,184,48,.25);font-weight:700}
+@keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(255,77,109,.0)}50%{box-shadow:0 0 0 3px rgba(255,77,109,.15)}}
+.overdue-row{border-color:rgba(255,77,109,.3) !important;background:rgba(255,77,109,.03) !important}
+
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
@@ -1344,9 +1350,10 @@ function rOV(c) {
     const g = goals.filter(x=>x.period===p);
     const pct = g.length ? Math.round(g.reduce((sum,x)=>sum+krPct(x),0)/g.length) : 0;
     const col = {weekly:'var(--pu)',monthly:'var(--bl)',annual:'var(--gn)'}[p];
+    const overdueCount = g.filter(x=>!x.done&&x.due_date&&new Date(x.due_date+'T00:00:00')<new Date()).length;
     return `<div style="margin-bottom:18px">
       <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--t3);margin-bottom:6px">
-        <span style="color:var(--t2);text-transform:capitalize;font-weight:700">${p}</span>
+        <span style="color:var(--t2);text-transform:capitalize;font-weight:700">${p}${overdueCount?` <span style="color:var(--rd);font-weight:800">· ${overdueCount} overdue</span>`:''}</span>
         <span style="color:${col}">${g.length} goals · ${pct}%</span>
       </div>
       <div class="pbar"><div class="pbfill" style="width:${pct}%;background:${col}"></div></div>
@@ -1402,21 +1409,33 @@ function krPct(goal) {
   return Math.round(krs.filter(k=>k.done).length / krs.length * 100);
 }
 
+
+function dueDateStatus(dueDateStr, done) {
+  if (!dueDateStr || done) return null;
+  const due = new Date(dueDateStr + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.ceil((due - today) / 86400000);
+  if (diff < 0) return { label: `Overdue by ${Math.abs(diff)} day${Math.abs(diff)===1?'':'s'}`, cls: 'chip-overdue', rowCls: 'overdue-row' };
+  if (diff === 0) return { label: 'Due today', cls: 'chip-due-soon', rowCls: 'overdue-row' };
+  if (diff <= 7) return { label: `Due in ${diff} day${diff===1?'':'s'}`, cls: 'chip-due-soon', rowCls: '' };
+  return { label: dueDateStr, cls: 'chip cd', rowCls: '' };
+}
 function goalRowHTML(x, editable=true, readonly=false) {
   const krs = getKRs(x);
   const pct = krPct(x);
   const hasDone = krs.length > 0;
   const cols={weekly:'var(--pu)',monthly:'var(--bl)',annual:'var(--gn)'};
   const barCol = cols[x.period] || 'var(--pu)';
-  return `<div class="grow" id="grow-${x.id}">
+  const _ds=dueDateStatus(x.due_date,x.done||pct===100);
+  return `<div class="grow ${_ds?.rowCls||''}" id="grow-${x.id}">
     <div class="chk ${x.done||pct===100?'on':''} ${readonly?'ro':''}" onclick="${readonly?'':' toggleGoal(\'' + x.id + '\',' + !(x.done) + ')'}"></div>
     <div style="flex:1;min-width:0">
       <div class="gtxt ${x.done?'done':''}">${x.text}</div>
-      <div class="gmeta">
+      ${(()=>{ const ds=dueDateStatus(x.due_date,x.done||pct===100); return `<div class="gmeta">
         ${x.owner?`<span class="chip cp">${x.owner}</span>`:''}
-        ${x.due_date?`<span class="chip cd">${x.due_date}</span>`:''}
+        ${ds?`<span class="${ds.cls}" style="font-size:10px;padding:2px 8px;border-radius:5px">${ds.label}</span>`:''}
         ${hasDone?`<span class="goal-kr-summary">${krs.filter(k=>k.done).length}/${krs.length} items · ${pct}%</span>`:''}
-      </div>
+      </div>`; })()}
       ${hasDone?`<div class="kr-pbar" style="margin-top:5px"><div class="kr-pfill" style="width:${pct}%;background:${barCol}"></div></div>`:''}
       <button class="goal-expand-btn" onclick="toggleKRs('${x.id}')">
         ▸ ${krs.length ? krs.length + ' key result' + (krs.length>1?'s':'') : 'Add key results'}
@@ -1583,7 +1602,11 @@ async function saveGoal() {
     done: false,
     key_results: newGoalKRs.length ? JSON.stringify(newGoalKRs) : null
   }).select().single();
-  if(error){showToast('Error saving goal',true);return;}
+  if(error){
+    console.error('Goal save error:', error);
+    showToast('Error: ' + (error.message || error.code || JSON.stringify(error)), true);
+    return;
+  }
   goals.push(data); newGoalKRs = []; cm(); rnd();
   showToast('Goal saved!');
 }
