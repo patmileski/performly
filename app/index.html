@@ -1907,7 +1907,7 @@ async function openMemberPanel(memberId){
     </div>
     <div id="review-section-${memberId}" style="margin-bottom:20px"></div>
     <div class="sslbl">Coaching History</div>
-    <div id="nhist">${renderNotes(notes||[])}</div>`;
+    <div id="nhist">${renderNotes(notes||[], '${memberId}')}</div>`;
 
   // RIGHT COLUMN — Add coaching note
   document.getElementById('sp-right').innerHTML=`
@@ -1958,7 +1958,7 @@ async function openMemberPanel(memberId){
   document.getElementById('povl').classList.add('on');
 }
 
-function renderNotes(notes){
+function renderNotes(notes, memberId=''){
   if(!notes.length) return `<div class="empty">No notes yet</div>`;
   return notes.map((n,idx)=>{
     const[bg,fg,lb]=TM[n.note_type]||TM.other;
@@ -1972,6 +1972,10 @@ function renderNotes(notes){
         <span class="ntype" style="background:${bg};color:${fg};margin-bottom:0">${lb}</span>
         <span style="font-size:10px;font-weight:600;color:var(--t3);flex-shrink:0">${date}</span>
         <span class="note-preview">${preview}</span>
+        <div style="display:flex;gap:4px;flex-shrink:0;margin-left:4px" onclick="event.stopPropagation()">
+          <button class="btn btn-ghost btn-xs" onclick="editNote('${n.id}','${memberId}')" style="padding:2px 8px;font-size:10px">✏️ Edit</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteNote('${n.id}','${memberId}')" style="padding:2px 8px;font-size:10px">✕</button>
+        </div>
         <span class="note-chevron">▼</span>
       </div>
       <div class="note-body"><div class="note-body-inner">${noteContent}</div></div>
@@ -1984,6 +1988,76 @@ function toggleNote(id){
   if(el) el.classList.toggle('open');
 }
 
+async function deleteNote(noteId, memberId) {
+  if (!confirm('Delete this coaching note? This cannot be undone.')) return;
+  const { error } = await sb.from('coaching_notes').delete().eq('id', noteId);
+  if (error) { showToast('Error deleting note', true); return; }
+  showToast('Note deleted');
+  // Reload notes
+  const { data: notes } = await sb.from('coaching_notes').select('*').eq('member_id', memberId).order('created_at', {ascending: false});
+  document.getElementById('nhist').innerHTML = renderNotes(notes||[], memberId);
+}
+
+function editNote(noteId, memberId) {
+  // Find note in DOM to get current content — refetch from server for accuracy
+  sb.from('coaching_notes').select('*').eq('id', noteId).single().then(({data: n}) => {
+    if (!n) return;
+    const[bg,fg,lb] = TM[n.note_type]||TM.other;
+    document.getElementById('modal-body').innerHTML = `
+      <div class="mttl">Edit Coaching Note</div>
+      <div class="fg"><label class="flbl2">Type</label>
+        <select id="edit-ntype">
+          <option value="1on1" ${n.note_type==='1on1'?'selected':''}>1:1 Session</option>
+          <option value="feedback" ${n.note_type==='feedback'?'selected':''}>Feedback</option>
+          <option value="performance" ${n.note_type==='performance'?'selected':''}>Performance Review</option>
+          <option value="recognition" ${n.note_type==='recognition'?'selected':''}>Recognition</option>
+          <option value="development" ${n.note_type==='development'?'selected':''}>Development Plan</option>
+          <option value="other" ${n.note_type==='other'?'selected':''}>Other</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-top:14px"><label class="flbl2">Notes</label>
+        <div class="rte-wrap">
+          <div class="rte-toolbar">
+            <button class="rte-btn" onclick="rteEdit('bold')"><b>B</b></button>
+            <button class="rte-btn" onclick="rteEdit('italic')"><i>I</i></button>
+            <button class="rte-btn" onclick="rteEdit('underline')"><u>U</u></button>
+            <div class="rte-sep"></div>
+            <button class="rte-btn" onclick="rteEdit('formatBlock','h1')">H1</button>
+            <button class="rte-btn" onclick="rteEdit('formatBlock','h2')">H2</button>
+            <button class="rte-btn" onclick="rteEdit('formatBlock','p')">P</button>
+            <div class="rte-sep"></div>
+            <button class="rte-btn" onclick="rteEdit('insertUnorderedList')">• List</button>
+            <button class="rte-btn" onclick="rteEdit('insertOrderedList')">1. List</button>
+          </div>
+          <div class="rte-editor" id="edit-ntxt" contenteditable="true" style="min-height:200px">${n.note_text||''}</div>
+        </div>
+      </div>
+      <div class="mac">
+        <button class="btn btn-ghost" onclick="cm()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEditNote('${noteId}','${memberId}')">Save Changes</button>
+      </div>`;
+    om();
+  });
+}
+
+function rteEdit(cmd, val=null) {
+  document.getElementById('edit-ntxt')?.focus();
+  document.execCommand(cmd, false, val);
+}
+
+async function saveEditNote(noteId, memberId) {
+  const text = document.getElementById('edit-ntxt')?.innerHTML?.trim();
+  const type = document.getElementById('edit-ntype')?.value;
+  if (!text || text === '<br>') { showToast('Note cannot be empty', true); return; }
+  const { error } = await sb.from('coaching_notes').update({ note_text: text, note_type: type }).eq('id', noteId);
+  if (error) { showToast('Error saving note', true); return; }
+  cm();
+  showToast('Note updated!');
+  // Reload notes
+  const { data: notes } = await sb.from('coaching_notes').select('*').eq('member_id', memberId).order('created_at', {ascending: false});
+  document.getElementById('nhist').innerHTML = renderNotes(notes||[], memberId);
+}
+
 async function saveNote(memberId){
   const el=document.getElementById('ntxt');
   const text=(el.tagName==='TEXTAREA'?el.value:el.innerHTML).trim();
@@ -1993,7 +2067,7 @@ async function saveNote(memberId){
   if(el.tagName==='TEXTAREA') el.value=''; else el.innerHTML='';
   // Reload notes
   const{data:notes}=await sb.from('coaching_notes').select('*').eq('member_id',memberId).order('created_at',{ascending:false});
-  document.getElementById('nhist').innerHTML=renderNotes(notes||[]);
+  document.getElementById('nhist').innerHTML=renderNotes(notes||[], memberId);
   showToast('Note saved!');
 }
 
