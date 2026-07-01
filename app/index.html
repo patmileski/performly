@@ -1657,8 +1657,16 @@ function pt() {
   el.innerHTML = l.map(t=>{
     const [bg,fg]=pc[t.priority]||pc.medium;
     const assignBadge = t.assigned_to ? `<span class="chip cp" style="font-size:9px;padding:2px 7px">${t.assigned_to}</span>` : '';
-    const dueBadge = t.due_date ? `<span class="chip cd" style="font-size:9px;padding:2px 7px">Due ${t.due_date}</span>` : '';
-    return `<div class="trow ${t.priority}">
+    const _tds = t.due_date && !t.done ? (()=>{
+      const due=new Date(t.due_date+'T00:00:00'),today=new Date();today.setHours(0,0,0,0);
+      const diff=Math.ceil((due-today)/86400000);
+      if(diff<0) return {label:`Overdue by ${Math.abs(diff)}d`,cls:'chip-overdue'};
+      if(diff===0) return {label:'Due today',cls:'chip-due-soon'};
+      if(diff<=7) return {label:`Due in ${diff}d`,cls:'chip-due-soon'};
+      return {label:'Due '+t.due_date,cls:'chip cd'};
+    })() : null;
+    const dueBadge = _tds ? `<span class="${_tds.cls}" style="font-size:9px;padding:2px 7px;border-radius:5px">${_tds.label}</span>` : '';
+    return `<div class="trow ${t.priority}${_tds?.cls==='chip-overdue'?' overdue-row':''}">
       <div class="chk ${t.done?'on':''}" onclick="toggleTask('${t.id}',${!t.done})"></div>
       <div class="tinfo">
         <div class="tname ${t.done?'done':''}">${t.name}</div>
@@ -1975,10 +1983,10 @@ async function openMemberPanel(memberId){
         <div style="font-size:15px;font-weight:800;color:var(--t1);letter-spacing:-.3px">New Coaching Note</div>
         <button onclick="collapseNoteEditor()" class="btn btn-ghost btn-sm">✕ Cancel</button>
       </div>
-      <div style="display:grid;grid-template-columns:180px 1fr;gap:12px;margin-bottom:14px;align-items:end">
-        <div>
+      <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-end;width:100%">
+        <div style="width:180px;flex-shrink:0">
           <label class="flbl2" style="margin-bottom:6px;display:block">Note Type</label>
-          <select id="ntype" style="height:38px;width:100%">
+          <select id="ntype" style="height:38px;width:180px">
             <option value="1on1">1:1 Session</option>
             <option value="feedback">Feedback</option>
             <option value="performance">Performance Review</option>
@@ -1987,7 +1995,7 @@ async function openMemberPanel(memberId){
             <option value="other">Other</option>
           </select>
         </div>
-        <div>
+        <div style="flex:1;min-width:0">
           <label class="flbl2" style="margin-bottom:6px;display:block">Note Title <span style="color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
           <input type="text" id="note-title" placeholder="e.g. Q3 Check-in, Development Plan Review..." style="height:38px;width:100%;box-sizing:border-box">
         </div>
