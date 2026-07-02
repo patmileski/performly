@@ -25,24 +25,25 @@ html{scroll-behavior:smooth}
 body{font-family:'Inter',sans-serif;background:var(--white);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
 /* ── NAV ── */
-.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:64px;display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 40px}
+.nav-inner{max-width:1240px;width:100%;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:32px}
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
 .nav-logo-mark{width:34px;height:34px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:white;letter-spacing:-.5px}
 .nav-logo-name{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.4px}
 .nav-links{display:flex;align-items:center;gap:4px;flex:1}
-.nav-link{font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;padding:5px 10px;border-radius:7px;transition:all .15s;white-space:nowrap}
+.nav-link{font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;padding:6px 14px;border-radius:100px;transition:all .15s;white-space:nowrap}
 .nav-link:hover{background:var(--off2);color:var(--ink)}
 .nav-end{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0}
-.btn-login{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--ink);background:none;border:1.5px solid var(--border2);padding:7px 16px;border-radius:8px;cursor:pointer;text-decoration:none;transition:all .15s}
+.btn-login{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--ink);background:none;border:1.5px solid var(--border2);padding:7px 16px;border-radius:100px;cursor:pointer;text-decoration:none;transition:all .15s}
 .btn-login:hover{border-color:var(--blue);color:var(--blue)}
-.btn-demo{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:white;background:var(--blue);border:none;padding:8px 18px;border-radius:8px;cursor:pointer;text-decoration:none;transition:all .2s;box-shadow:0 2px 8px rgba(31,77,219,.3)}
+.btn-demo{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:white;background:var(--blue);border:none;padding:9px 20px;border-radius:100px;cursor:pointer;text-decoration:none;transition:all .2s;box-shadow:0 2px 8px rgba(31,77,219,.3)}
 .btn-demo:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(31,77,219,.4)}
 
 /* ── HERO ── */
-.hero{padding:80px 48px 60px;max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.hero{padding:90px 48px 70px;max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
 .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--greenbg);border:1px solid rgba(13,122,85,.18);border-radius:100px;padding:5px 14px 5px 6px;font-size:12px;font-weight:600;color:var(--green);margin-bottom:28px}
 .hero-eyebrow-pill{background:var(--green);color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.5px;text-transform:uppercase}
-.hero-h1{font-size:56px;font-weight:900;line-height:1.04;letter-spacing:-2.5px;color:var(--ink);margin-bottom:22px}
+.hero-h1{font-size:60px;font-weight:900;line-height:1.02;letter-spacing:-3px;color:var(--ink);margin-bottom:24px}
 .hero-h1 .accent{color:var(--blue)}
 .hero-sub{font-size:18px;font-weight:400;color:var(--ink2);line-height:1.65;margin-bottom:36px;max-width:500px}
 .hero-actions{display:flex;gap:12px;align-items:center;margin-bottom:28px}
@@ -103,6 +104,7 @@ body{font-family:'Inter',sans-serif;background:var(--white);color:var(--ink);-we
 .section-h2{font-size:44px;font-weight:900;letter-spacing:-2px;color:var(--ink);line-height:1.08;margin-bottom:16px}
 .section-sub{font-size:17px;color:var(--ink2);line-height:1.68;max-width:560px}
 .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+@media(max-width:900px){.feature-grid{grid-template-columns:1fr 1fr}}
 .feat-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:30px;transition:all .2s;position:relative;overflow:hidden}
 .feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(31,77,219,.03));opacity:0;transition:opacity .2s}
 .feat-card:hover{border-color:var(--blue);box-shadow:var(--shadow-lg);transform:translateY(-3px)}
@@ -239,19 +241,21 @@ footer{background:var(--ink);padding:72px 48px 40px}
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="nav-logo">
-    <div class="nav-logo-mark">C</div>
-    <span class="nav-logo-name">CoachOps360</span>
-  </a>
-  <div class="nav-links" style="display:flex;align-items:center;gap:2px;flex:1">
-    <a href="#features" class="nav-link">Features</a>
-    <a href="#how-it-works" class="nav-link">How it works</a>
-    <a href="#roles" class="nav-link">For your team</a>
-    <a href="#pricing" class="nav-link">Pricing</a>
-  </div>
-  <div class="nav-end">
-    <a href="https://coachops360.com/app" class="btn-login">Log in</a>
-    <a href="https://coachops360.com/app" class="btn-demo">Start free →</a>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-mark">C</div>
+      <span class="nav-logo-name">CoachOps360</span>
+    </a>
+    <div class="nav-links" style="display:flex;align-items:center;gap:2px;flex:1;justify-content:center">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#how-it-works" class="nav-link">How it works</a>
+      <a href="#roles" class="nav-link">For your team</a>
+      <a href="#pricing" class="nav-link">Pricing</a>
+    </div>
+    <div class="nav-end">
+      <a href="https://coachops360.com/app" class="btn-login">Log in</a>
+      <a href="https://coachops360.com/app" class="btn-demo">Start free →</a>
+    </div>
   </div>
 </nav>
 
@@ -260,10 +264,10 @@ footer{background:var(--ink);padding:72px 48px 40px}
   <div>
     <div class="hero-eyebrow fade">
       <span class="hero-eyebrow-pill">New</span>
-      Your team deserves more than annual reviews
+      Goals · Coaching · 1:1s · Reviews · Tasks
     </div>
     <h1 class="hero-h1 fade">Every person<br>on your team<br><span class="accent">deserves to grow.</span></h1>
-    <p class="hero-sub fade">CoachOps360 gives every team member clear goals, consistent coaching conversations, and visibility into their own progress — so development happens every week, not just once a year.</p>
+    <p class="hero-sub fade">CoachOps360 gives every team member clear goals, consistent 1:1 coaching, and visibility into their own progress. Development that happens every week — not just at review time.</p>
     <div class="hero-actions fade">
       <a href="https://coachops360.com/app" class="btn-hero-cta">Start developing your team →</a>
       <a href="#features" class="btn-hero-ghost">See all features</a>
@@ -352,33 +356,48 @@ footer{background:var(--ink);padding:72px 48px 40px}
   <div class="feature-grid">
     <div class="feat-card fade">
       <div class="feat-icon" style="background:#eef2fd">🎯</div>
-      <h3 class="feat-title">Goals Every Person Understands</h3>
-      <p class="feat-desc">Every team member gets weekly, monthly, and annual goals broken down into simple key results they can check off. No more wondering what success looks like — it's right there.</p>
+      <h3 class="feat-title">Goals & Key Results</h3>
+      <p class="feat-desc">Weekly, monthly, and annual goals with trackable key results. Overdue goals are automatically flagged with red indicators so nothing slips through the cracks.</p>
     </div>
     <div class="feat-card fade">
       <div class="feat-icon" style="background:#e6f5f0">📅</div>
-      <h3 class="feat-title">1:1s That Build Real Relationships</h3>
-      <p class="feat-desc">Schedule regular coaching sessions and let your team add their own agenda items. When people come prepared with what they want to discuss, 1:1s stop being status updates and start building trust.</p>
+      <h3 class="feat-title">1:1 Scheduling + Calendar Export</h3>
+      <p class="feat-desc">Schedule sessions, build agendas, and let team members add their own talking points. Export any session directly to Outlook or Google Calendar with one click.</p>
     </div>
     <div class="feat-card fade">
       <div class="feat-icon" style="background:#fef3e0">📝</div>
-      <h3 class="feat-title">A Coaching History That Compounds</h3>
-      <p class="feat-desc">Every conversation logged becomes a building block. Rich coaching notes with action items, feedback, and recognition create a full growth story for each person — one session at a time.</p>
+      <h3 class="feat-title">Rich Coaching Notes</h3>
+      <p class="feat-desc">Log notes with a full rich-text editor — headings, tables, bullet lists, font colors, highlights. Edit or delete any note. Full coaching history per person, always searchable.</p>
     </div>
     <div class="feat-card fade">
       <div class="feat-icon" style="background:#fce7f3">✅</div>
-      <h3 class="feat-title">Keep Everyone Growing, Even in Slow Periods</h3>
-      <p class="feat-desc">Slow periods don't have to be wasted. Assign purposeful tasks each team member can pick up, check off, and add notes to. Development keeps moving even when business slows down.</p>
+      <h3 class="feat-title">Task Tracking with Overdue Alerts</h3>
+      <p class="feat-desc">Assign tasks with due dates and priority. Overdue tasks are flagged automatically. Team members check off tasks and add progress notes from their own private dashboard.</p>
     </div>
     <div class="feat-card fade">
       <div class="feat-icon" style="background:#f3eeff">📄</div>
-      <h3 class="feat-title">Annual Reviews Accessible to Everyone</h3>
-      <p class="feat-desc">Upload annual reviews to each person's profile so they always have access to their own performance history. No more chasing down PDFs. Every team member owns their record.</p>
+      <h3 class="feat-title">Annual Review Uploads</h3>
+      <p class="feat-desc">Upload performance reviews as PDF or Word to each person's profile. Team members can view and download their own reviews anytime — no shared drives or lost emails.</p>
     </div>
     <div class="feat-card fade">
       <div class="feat-icon" style="background:#e6f5f0">👤</div>
-      <h3 class="feat-title">Every Team Member Has Their Own Dashboard</h3>
-      <p class="feat-desc">Each person on your team logs in to see their own goals, coaching notes, upcoming 1:1s, tasks, and reviews — private to them. Their development, organized and always within reach.</p>
+      <h3 class="feat-title">Private Team Member Portal</h3>
+      <p class="feat-desc">Each person logs in with a PIN to their own private dashboard — goals, 1:1s, coaching notes, tasks, reviews, and job description. Private to them, always available.</p>
+    </div>
+    <div class="feat-card fade">
+      <div class="feat-icon" style="background:#fff3e0">⚠️</div>
+      <h3 class="feat-title">Overdue Goal & Task Indicators</h3>
+      <p class="feat-desc">Past-due goals and tasks are automatically highlighted with overdue counts on the dashboard. Always know what needs attention before your next coaching conversation.</p>
+    </div>
+    <div class="feat-card fade">
+      <div class="feat-icon" style="background:#e3f2fd">💼</div>
+      <h3 class="feat-title">Job Descriptions</h3>
+      <p class="feat-desc">Store each team member's job description in their profile so they can always reference their role, responsibilities, and what great performance looks like.</p>
+    </div>
+    <div class="feat-card fade">
+      <div class="feat-icon" style="background:#fce4ec">⚙️</div>
+      <h3 class="feat-title">Account & Subscription Management</h3>
+      <p class="feat-desc">Update your profile, change plans, and manage billing — all from inside the app. Cancel or upgrade anytime without contacting support.</p>
     </div>
   </div>
 </section>
