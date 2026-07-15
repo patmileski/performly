@@ -1482,7 +1482,7 @@ function goalRowHTML(x, editable=true, readonly=false) {
         </div>`:''}
       </div>
     </div>
-    ${editable?`<button class="dbtn" onclick="deleteGoal('${x.id}')">✕</button>`:''}
+    ${editable?`<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="dbtn" onclick="editGoal('${x.id}')" title="Edit" style="font-size:11px">✏️</button><button class="dbtn" onclick="deleteGoal('${x.id}')" title="Delete">✕</button></div>`:''}
   </div>`;
 }
 
@@ -1658,9 +1658,66 @@ async function empToggleKR(goalId, idx) {
 }
 
 async function deleteGoal(id) {
+  if (!confirm('Delete this goal and all its key results?')) return;
   await sb.from('goals').delete().eq('id',id);
   goals = goals.filter(x=>x.id!==id); rnd();
 }
+
+function editGoal(goalId) {
+  const g = goals.find(x=>x.id===goalId);
+  if (!g) return;
+  const memberOpts = members.map(m=>`<option value="${m.name}" ${g.owner===m.name?'selected':''}>${m.name}</option>`).join('');
+  document.getElementById('modal-body').innerHTML = `
+    <div class="mttl">Edit Goal</div>
+    <div class="fg">
+      <label class="flbl2">Description</label>
+      <textarea id="eg-tx" style="min-height:80px">${g.text||''}</textarea>
+    </div>
+    <div class="fr2" style="margin-top:14px">
+      <div class="fg" style="margin:0">
+        <label class="flbl2">Period</label>
+        <select id="eg-pe">
+          <option value="weekly" ${g.period==='weekly'?'selected':''}>Weekly</option>
+          <option value="monthly" ${g.period==='monthly'?'selected':''}>Monthly</option>
+          <option value="annual" ${g.period==='annual'?'selected':''}>Annual</option>
+        </select>
+      </div>
+      <div class="fg" style="margin:0">
+        <label class="flbl2">Owner</label>
+        <select id="eg-ow">
+          <option value="" ${!g.owner?'selected':''}>— None —</option>
+          ${memberOpts}
+        </select>
+      </div>
+    </div>
+    <div class="fg" style="margin-top:14px">
+      <label class="flbl2">Due Date</label>
+      <input type="date" id="eg-du" value="${g.due_date||''}">
+    </div>
+    <div class="mac">
+      <button class="btn btn-ghost" onclick="cm()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditGoal('${goalId}')">Save Changes</button>
+    </div>`;
+  om();
+}
+
+async function saveEditGoal(goalId) {
+  const text = document.getElementById('eg-tx').value.trim();
+  if (!text) { showToast('Description is required', true); return; }
+  const updates = {
+    text,
+    period: document.getElementById('eg-pe').value,
+    owner: document.getElementById('eg-ow').value || null,
+    due_date: document.getElementById('eg-du').value || null,
+  };
+  const { error } = await sb.from('goals').update(updates).eq('id', goalId);
+  if (error) { showToast('Error: ' + error.message, true); return; }
+  const g = goals.find(x=>x.id===goalId);
+  if (g) Object.assign(g, updates);
+  cm(); rnd();
+  showToast('Goal updated!');
+}
+
 
 // ══════════════════════════════════════════════════════
 // TASKS
