@@ -1391,6 +1391,12 @@ function rOV(c) {
         <span style="color:${col}">${g.length} goals · ${pct}%</span>
       </div>
       <div class="pbar"><div class="pbfill" style="width:${pct}%;background:${col}"></div></div>
+    </div>
+
+    <!-- Annual Reviews Section -->
+    <div style="margin-bottom:28px">
+      <div class="sslbl">Annual Reviews</div>
+      <div id="review-section-${memberId}"></div>
     </div>`;
   };
 
@@ -2123,14 +2129,8 @@ async function openMemberPanel(memberId){
       <div id="nhist">${renderNotes(notes||[], '${memberId}')}</div>
     </div>
 
-    <!-- Annual Reviews Section -->
-    <div style="margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--b1)">
-      <div class="sslbl">Annual Reviews</div>
-      <div id="review-section-${memberId}"></div>
-    </div>
-
     <!-- Private Manager Notes -->
-    <div style="margin-bottom:28px">
+    <div style="margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--b1)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:10px">
           <div class="sslbl" style="margin-bottom:0">Private Notes</div>
@@ -2149,6 +2149,11 @@ async function openMemberPanel(memberId){
           </div>
         </div>
       </div>
+
+    <!-- Annual Reviews Section -->
+    <div style="margin-bottom:28px">
+      <div class="sslbl">Annual Reviews</div>
+      <div id="review-section-${memberId}"></div>
     </div>`;
 
   // STICKY FOOTER — collapsed add note button, expands to full editor
