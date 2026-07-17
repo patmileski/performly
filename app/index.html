@@ -326,6 +326,21 @@ select option{background:#0d1120}
 .note-body-inner{padding-top:14px}
 .note-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 
+/* ── COLLAPSIBLE JOB DESCRIPTIONS (manager view) ── */
+.job-item{background:var(--s1);border:1px solid var(--b1);border-radius:12px;margin-bottom:8px;overflow:hidden;transition:border-color .2s;animation:fsIn .25s ease}
+.job-item:hover{border-color:var(--b2)}
+.job-item.open{border-color:rgba(108,99,255,.3);background:rgba(108,99,255,.04)}
+.job-header{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none}
+.job-header:hover{background:rgba(255,255,255,.03)}
+.job-chevron{font-size:11px;color:var(--t3);transition:transform .2s;flex-shrink:0;margin-left:auto}
+.job-item.open .job-chevron{transform:rotate(180deg)}
+.job-header-info{flex:1;min-width:0}
+.job-header-info .jttl{font-size:14px}
+.job-header-info .jdep{margin-bottom:0}
+.job-body{display:none;padding:0 16px 16px;border-top:1px solid var(--b1);margin-top:0}
+.job-item.open .job-body{display:block}
+.job-body-inner{padding-top:14px}
+
 
 /* ── KEY RESULTS ── */
 .goal-expand-btn{background:none;border:none;color:var(--t3);cursor:pointer;font-size:10px;font-weight:700;padding:0;transition:color .15s;letter-spacing:.5px;text-transform:uppercase;margin-top:4px;display:inline-flex;align-items:center;gap:4px}
@@ -2356,19 +2371,31 @@ async function saveNote(memberId){
 function rJB(c,a){
   a.innerHTML=`<button class="btn btn-primary" onclick="ojm()">+ Add Role</button>`;
   if(!jobs.length){c.innerHTML=`<div class="empty" style="padding:80px;font-size:14px"><div class="eico" style="font-size:44px">◫</div>No job descriptions yet.<br><br><button class="btn btn-primary" onclick="ojm()">Create First Role</button></div>`;return;}
-  c.innerHTML=`<div class="jgrid">${jobs.map(j=>`
-    <div class="jcard">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-        <div><div class="jttl">${j.title}</div>${j.department?`<div class="jdep">${j.department}</div>`:''}</div>
-        <div style="display:flex;gap:6px;flex-shrink:0">
-          <button class="btn btn-ghost btn-xs" onclick="ojm('${j.id}')">Edit</button>
-          <button class="btn btn-danger btn-xs" onclick="deleteJob('${j.id}')">✕</button>
+  c.innerHTML=jobs.map((j,idx)=>{
+    const preview=(j.summary||j.responsibilities||'No summary yet').replace(/\s+/g,' ').trim().slice(0,90);
+    return `<div class="job-item" id="job-${idx}">
+      <div class="job-header" onclick="toggleJob('job-${idx}')">
+        <div class="job-header-info">
+          <div class="jttl">${j.title}</div>${j.department?`<div class="jdep">${j.department}</div>`:''}
         </div>
+        <span class="note-preview">${preview}</span>
+        <div class="note-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-ghost btn-xs" onclick="ojm('${j.id}')" style="padding:2px 10px;font-size:10px;height:24px">✏️ Edit</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteJob('${j.id}')" style="padding:2px 10px;font-size:10px;height:24px">✕ Delete</button>
+        </div>
+        <span class="job-chevron">▼</span>
       </div>
-      ${j.summary?`<p class="jtxt" style="margin-top:8px">${j.summary}</p>`:''}
-      ${j.responsibilities?`<div class="jstl">Responsibilities</div><div class="jtxt">${j.responsibilities}</div>`:''}
-      ${j.requirements?`<div class="jstl">Requirements</div><div class="jtxt">${j.requirements}</div>`:''}
-    </div>`).join('')}`;
+      <div class="job-body"><div class="job-body-inner">
+        ${j.summary?`<p class="jtxt">${j.summary}</p>`:''}
+        ${j.responsibilities?`<div class="jstl">Responsibilities</div><div class="jtxt">${j.responsibilities}</div>`:''}
+        ${j.requirements?`<div class="jstl">Requirements</div><div class="jtxt">${j.requirements}</div>`:''}
+      </div></div>
+    </div>`;
+  }).join('');
+}
+function toggleJob(id){
+  const el=document.getElementById(id);
+  if(el) el.classList.toggle('open');
 }
 function ojm(editId=null){
   const j=editId?jobs.find(x=>x.id===editId):{};
