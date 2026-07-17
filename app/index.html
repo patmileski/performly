@@ -1337,7 +1337,7 @@ const VMETA = {
   'members':      ['Team Members','Manage your team'],
   'jobs':         ['Job Descriptions','Roles & responsibilities'],
   'my-overview':  ['My Dashboard','Your personal snapshot'],
-  'my-goals':     ['My Goals','Your weekly, monthly & annual targets'],
+  'my-goals':     ['My Goals','Your weekly, monthly, annual & long-term targets'],
   'my-tasks':     ['Downtime Tasks','Tasks to tackle in slow periods'],
   'my-sessions':  ['My 1:1s','Your upcoming & past sessions'],
   'my-coaching':  ['My Coaching Notes','Notes from your sessions'],
@@ -1383,7 +1383,7 @@ function rOV(c) {
   const pb = (p) => {
     const g = goals.filter(x=>x.period===p);
     const pct = g.length ? Math.round(g.reduce((sum,x)=>sum+krPct(x),0)/g.length) : 0;
-    const col = {weekly:'var(--pu)',monthly:'var(--bl)',annual:'var(--gn)'}[p];
+    const col = {weekly:'var(--pu)',monthly:'var(--bl)',annual:'var(--gn)',longterm:'var(--am)'}[p];
     const overdueCount = g.filter(x=>!x.done&&x.due_date&&new Date(x.due_date+'T00:00:00')<new Date()).length;
     return `<div style="margin-bottom:18px">
       <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--t3);margin-bottom:6px">
@@ -1405,7 +1405,7 @@ function rOV(c) {
       <div class="scard bl"><span class="sico">◉</span><div class="sval">${members.length}</div><div class="slbl">Team Members</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
-      <div class="card"><div class="card-ttl">Goal Progress</div>${['weekly','monthly','annual'].map(pb).join('')}</div>
+      <div class="card"><div class="card-ttl">Goal Progress</div>${['weekly','monthly','annual','longterm'].map(pb).join('')}</div>
       <div class="card"><div class="card-ttl">Upcoming 1:1s</div>
         ${upSess.length===0?'<div class="empty"><div class="eico">📅</div>No upcoming sessions</div>':
           upSess.slice(0,5).map(s=>{
@@ -1458,7 +1458,7 @@ function goalRowHTML(x, editable=true, readonly=false) {
   const krs = getKRs(x);
   const pct = krPct(x);
   const hasDone = krs.length > 0;
-  const cols={weekly:'var(--pu)',monthly:'var(--bl)',annual:'var(--gn)'};
+  const cols={weekly:'var(--pu)',monthly:'var(--bl)',annual:'var(--gn)',longterm:'var(--am)'};
   const barCol = cols[x.period] || 'var(--pu)';
   const _ds=dueDateStatus(x.due_date,x.done||pct===100);
   return `<div class="grow ${_ds?.rowCls||''}" id="grow-${x.id}">
@@ -1554,7 +1554,7 @@ function rGL(c, a) {
     const g = goals.filter(x=>x.period===p);
     // Calculate overall % including KRs
     const totalPct = g.length ? Math.round(g.reduce((sum,x)=>sum+krPct(x),0)/g.length) : 0;
-    const cols={weekly:['var(--pu)','#a89fff'],monthly:['var(--bl)','#7fd4ff'],annual:['var(--gn)','#5fffcb']};
+    const cols={weekly:['var(--pu)','#a89fff'],monthly:['var(--bl)','#7fd4ff'],annual:['var(--gn)','#5fffcb'],longterm:['var(--am)','#ffd580']};
     const [c2,light]=cols[p];
     return `<div class="pcard">
       <div class="phead">
@@ -1571,7 +1571,7 @@ function rGL(c, a) {
       </div>
     </div>`;
   };
-  c.innerHTML = `<div class="ggrid">${['weekly','monthly','annual'].map(pc).join('')}</div>`;
+  c.innerHTML = `<div class="ggrid">${['weekly','monthly','annual','longterm'].map(pc).join('')}</div>`;
 }
 
 let newGoalKRs = [];
@@ -1582,7 +1582,7 @@ function ogm() {
   document.getElementById('modal-body').innerHTML = `<div class="mttl">New Goal</div>
     <div class="fg"><label class="flbl2">Description</label><textarea id="g-tx" placeholder="What does success look like?" style="min-height:70px"></textarea></div>
     <div class="fr2">
-      <div class="fg" style="margin:0"><label class="flbl2">Period</label><select id="g-pe"><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="annual">Annual</option></select></div>
+      <div class="fg" style="margin:0"><label class="flbl2">Period</label><select id="g-pe"><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="annual">Annual</option><option value="longterm">Long Term</option></select></div>
       <div class="fg" style="margin:0"><label class="flbl2">Owner</label><select id="g-ow"><option value="">— None —</option>${memberOpts}</select></div>
     </div>
     <div class="fg" style="margin-top:12px"><label class="flbl2">Due Date</label><input type="date" id="g-du"></div>
@@ -1685,6 +1685,7 @@ function editGoal(goalId) {
           <option value="weekly" ${g.period==='weekly'?'selected':''}>Weekly</option>
           <option value="monthly" ${g.period==='monthly'?'selected':''}>Monthly</option>
           <option value="annual" ${g.period==='annual'?'selected':''}>Annual</option>
+          <option value="longterm" ${g.period==='longterm'?'selected':''}>Long Term</option>
         </select>
       </div>
       <div class="fg" style="margin:0">
@@ -2534,7 +2535,7 @@ function rMyOV(c) {
   const pb = (p) => {
     const g = goals.filter(x=>x.period===p&&x.owner===m.name);
     const d=g.filter(x=>x.done).length, pct=g.length?Math.round(d/g.length*100):0;
-    const cc={weekly:'var(--pu)',monthly:'var(--bl)',annual:'var(--gn)'}[p];
+    const cc={weekly:'var(--pu)',monthly:'var(--bl)',annual:'var(--gn)',longterm:'var(--am)'}[p];
     return `<div style="margin-bottom:18px">
       <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--t3);margin-bottom:6px">
         <span style="color:var(--t2);text-transform:capitalize;font-weight:700">${p}</span>
@@ -2559,7 +2560,7 @@ function rMyOV(c) {
       <div class="scard bl"><span class="sico">📅</span><div class="sval">${upSess.length}</div><div class="slbl">Upcoming 1:1s</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
-      <div class="card"><div class="card-ttl">My Goal Progress</div>${['weekly','monthly','annual'].map(pb).join('')}</div>
+      <div class="card"><div class="card-ttl">My Goal Progress</div>${['weekly','monthly','annual','longterm'].map(pb).join('')}</div>
       <div class="card"><div class="card-ttl">Upcoming 1:1s</div>
         ${upSess.length===0?'<div class="empty"><div class="eico">📅</div>No upcoming sessions</div>':
           upSess.slice(0,5).map(s=>`<div style="padding:9px 0;border-bottom:1px solid var(--b1)">
@@ -2576,7 +2577,7 @@ function rMyGL(c) {
   const pc = (p) => {
     const g = goals.filter(x=>x.period===p&&x.owner===m.name);
     const totalPct = g.length ? Math.round(g.reduce((sum,x)=>sum+krPct(x),0)/g.length) : 0;
-    const cols={weekly:['var(--pu)','#a89fff'],monthly:['var(--bl)','#7fd4ff'],annual:['var(--gn)','#5fffcb']};
+    const cols={weekly:['var(--pu)','#a89fff'],monthly:['var(--bl)','#7fd4ff'],annual:['var(--gn)','#5fffcb'],longterm:['var(--am)','#ffd580']};
     const [c2,light]=cols[p];
     return `<div class="pcard">
       <div class="phead">
@@ -2594,7 +2595,7 @@ function rMyGL(c) {
     </div>`;
   };
   c.innerHTML = `<div class="info-pill">ℹ Check off key results as you complete them</div>
-    <div class="ggrid">${['weekly','monthly','annual'].map(pc).join('')}</div>`;
+    <div class="ggrid">${['weekly','monthly','annual','longterm'].map(pc).join('')}</div>`;
 }
 
 function rMyTK(c) {
