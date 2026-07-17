@@ -2116,7 +2116,10 @@ async function openMemberPanel(memberId){
 
     <!-- Coaching History -->
     <div style="margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--b1)">
-      <div class="sslbl">Coaching History (${(notes||[]).length})</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="sslbl" style="margin-bottom:0">Coaching History (${(notes||[]).length})</div>
+        <button class="btn btn-primary btn-sm" onclick="expandNoteEditor('${memberId}')">+ Add Coaching Note</button>
+      </div>
       <div id="nhist">${renderNotes(notes||[], '${memberId}')}</div>
     </div>
 
@@ -2128,24 +2131,29 @@ async function openMemberPanel(memberId){
 
     <!-- Private Manager Notes -->
     <div style="margin-bottom:28px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div class="sslbl" style="margin-bottom:0">Private Notes</div>
-        <span class="private-note-badge">🔒 Manager only</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="sslbl" style="margin-bottom:0">Private Notes</div>
+          <span class="private-note-badge">🔒 Manager only</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('private-note-form-${memberId}').style.display='block';document.getElementById('private-note-input-${memberId}').focus()" style="border-color:var(--am);color:var(--am);font-size:11px">+ Add Private Note</button>
       </div>
       <div style="font-size:12px;color:var(--t3);margin-bottom:12px">These notes are never visible to team members. Use them for observations, HR context, or reminders only you need to see.</div>
       <div id="private-notes-list-${memberId}" style="margin-bottom:12px"></div>
-      <div style="display:flex;gap:8px;align-items:flex-start">
-        <textarea id="private-note-input-${memberId}" placeholder="Write a private note..." style="flex:1;min-height:80px;padding:10px 12px;font-size:13px;border-radius:8px;resize:vertical"></textarea>
-        <button class="btn btn-ghost btn-sm" onclick="savePrivateNote('${memberId}')" style="flex-shrink:0;margin-top:2px;border-color:var(--am);color:var(--am)">+ Save</button>
+      <div id="private-note-form-${memberId}" style="display:none;margin-top:8px">
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <textarea id="private-note-input-${memberId}" placeholder="Write a private note..." style="flex:1;min-height:80px;padding:10px 12px;font-size:13px;border-radius:8px;resize:vertical"></textarea>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="savePrivateNote('${memberId}')" style="border-color:var(--am);color:var(--am)">+ Save</button>
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('private-note-form-${memberId}').style.display='none'" style="font-size:10px">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>`;
 
   // STICKY FOOTER — collapsed add note button, expands to full editor
   document.getElementById('sp-footer').innerHTML=`
-    <div id="note-collapsed" style="display:flex;align-items:center;justify-content:space-between">
-      <span style="font-size:12px;font-weight:600;color:var(--t3)">Add a coaching note...</span>
-      <button class="btn btn-primary btn-sm" onclick="expandNoteEditor('${memberId}')">+ Add Note</button>
-    </div>
+    <div id="note-collapsed" style="display:none">
     <div id="note-expanded" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <div style="font-size:15px;font-weight:800;color:var(--t1);letter-spacing:-.3px">New Coaching Note</div>
@@ -2305,18 +2313,22 @@ function editNote(noteId, memberId) {
 
 
 function expandNoteEditor(memberId) {
-  document.getElementById('note-collapsed').style.display = 'none';
+  // Show the note editor inline - it's in the sp-footer but we scroll sp-body
   document.getElementById('note-expanded').style.display = 'block';
   document.querySelector('.sp-footer').classList.add('expanded');
+  // Scroll sp-body to top so coaching history is visible with editor open
+  const spBody = document.querySelector('.sp-body');
+  if (spBody) spBody.scrollTop = 0;
   setTimeout(() => document.getElementById('ntxt')?.focus(), 50);
 }
 
 function collapseNoteEditor() {
   document.getElementById('note-expanded').style.display = 'none';
-  document.getElementById('note-collapsed').style.display = 'flex';
-  document.querySelector('.sp-footer').classList.remove('expanded');
+  document.querySelector('.sp-footer')?.classList.remove('expanded');
   const ntxt = document.getElementById('ntxt');
   if (ntxt) ntxt.innerHTML = '';
+  const titleEl = document.getElementById('note-title');
+  if (titleEl) titleEl.value = '';
 }
 function rteEdit(cmd, val=null) {
   document.getElementById('edit-ntxt')?.focus();
