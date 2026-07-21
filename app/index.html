@@ -132,7 +132,7 @@ select option{background:#0d1120}
 .card-ttl{font-size:13px;font-weight:700;letter-spacing:-.2px;margin-bottom:16px}
 
 /* ── GOALS ── */
-.ggrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .pcard{background:var(--s1);border:1px solid var(--b1);border-radius:18px;overflow:hidden;transition:border-color .2s}
 .pcard:hover{border-color:var(--b2)}
 .phead{padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--b1)}
@@ -325,21 +325,6 @@ select option{background:#0d1120}
 .note-item.open .note-body{display:block}
 .note-body-inner{padding-top:14px}
 .note-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-
-/* ── COLLAPSIBLE JOB DESCRIPTIONS (manager view) ── */
-.job-item{background:var(--s1);border:1px solid var(--b1);border-radius:12px;margin-bottom:8px;overflow:hidden;transition:border-color .2s;animation:fsIn .25s ease}
-.job-item:hover{border-color:var(--b2)}
-.job-item.open{border-color:rgba(108,99,255,.3);background:rgba(108,99,255,.04)}
-.job-header{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none}
-.job-header:hover{background:rgba(255,255,255,.03)}
-.job-chevron{font-size:11px;color:var(--t3);transition:transform .2s;flex-shrink:0;margin-left:auto}
-.job-item.open .job-chevron{transform:rotate(180deg)}
-.job-header-info{flex:1;min-width:0}
-.job-header-info .jttl{font-size:14px}
-.job-header-info .jdep{margin-bottom:0}
-.job-body{display:none;padding:0 16px 16px;border-top:1px solid var(--b1);margin-top:0}
-.job-item.open .job-body{display:block}
-.job-body-inner{padding-top:14px}
 
 
 /* ── KEY RESULTS ── */
@@ -2111,7 +2096,7 @@ async function openMemberPanel(memberId){
   // SCROLLABLE BODY — member info, annual reviews section, coaching history
   document.getElementById('sp-body').innerHTML=`
     <!-- Member Info Row -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--b1)">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--b1)">
       <div style="background:var(--s2);border-radius:10px;padding:14px">
         <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Role</div>
         <div style="font-size:13px;font-weight:700;color:var(--t1)">${m.role||'—'}</div>
@@ -2127,6 +2112,13 @@ async function openMemberPanel(memberId){
       <div style="background:var(--s2);border-radius:10px;padding:14px">
         <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Coaching Notes</div>
         <div style="font-size:20px;font-weight:900;color:var(--pu);letter-spacing:-1px">${(notes||[]).length}</div>
+      </div>
+      <div style="background:var(--s2);border-radius:10px;padding:14px;display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--t3);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Login PIN</div>
+          <div style="font-size:20px;font-weight:900;letter-spacing:4px;color:var(--t1);font-family:monospace">${m.pin?'••••':'—'}</div>
+        </div>
+        <button onclick="resetPin('${memberId}')" class="btn btn-ghost btn-xs" style="margin-top:10px;font-size:10px;padding:4px 10px;width:100%;justify-content:center">🔑 Reset PIN</button>
       </div>
     </div>
 
@@ -2271,7 +2263,7 @@ function expandNoteEditor(memberId) {
     <div style="display:grid;grid-template-columns:160px 1fr;gap:12px;margin-bottom:14px;align-items:end">
       <div>
         <label class="flbl2" style="margin-bottom:6px;display:block">Note Type</label>
-        <select id="ntype" style="height:40px;width:100%">
+        <select id="ntype" style="height:36px;width:100%">
           <option value="1on1">1:1 Session</option>
           <option value="feedback">Feedback</option>
           <option value="performance">Performance Review</option>
@@ -2371,31 +2363,19 @@ async function saveNote(memberId){
 function rJB(c,a){
   a.innerHTML=`<button class="btn btn-primary" onclick="ojm()">+ Add Role</button>`;
   if(!jobs.length){c.innerHTML=`<div class="empty" style="padding:80px;font-size:14px"><div class="eico" style="font-size:44px">◫</div>No job descriptions yet.<br><br><button class="btn btn-primary" onclick="ojm()">Create First Role</button></div>`;return;}
-  c.innerHTML=jobs.map((j,idx)=>{
-    const preview=(j.summary||j.responsibilities||'No summary yet').replace(/\s+/g,' ').trim().slice(0,90);
-    return `<div class="job-item" id="job-${idx}">
-      <div class="job-header" onclick="toggleJob('job-${idx}')">
-        <div class="job-header-info">
-          <div class="jttl">${j.title}</div>${j.department?`<div class="jdep">${j.department}</div>`:''}
+  c.innerHTML=`<div class="jgrid">${jobs.map(j=>`
+    <div class="jcard">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div><div class="jttl">${j.title}</div>${j.department?`<div class="jdep">${j.department}</div>`:''}</div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn btn-ghost btn-xs" onclick="ojm('${j.id}')">Edit</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteJob('${j.id}')">✕</button>
         </div>
-        <span class="note-preview">${preview}</span>
-        <div class="note-actions" onclick="event.stopPropagation()">
-          <button class="btn btn-ghost btn-xs" onclick="ojm('${j.id}')" style="padding:2px 10px;font-size:10px;height:24px">✏️ Edit</button>
-          <button class="btn btn-danger btn-xs" onclick="deleteJob('${j.id}')" style="padding:2px 10px;font-size:10px;height:24px">✕ Delete</button>
-        </div>
-        <span class="job-chevron">▼</span>
       </div>
-      <div class="job-body"><div class="job-body-inner">
-        ${j.summary?`<p class="jtxt">${j.summary}</p>`:''}
-        ${j.responsibilities?`<div class="jstl">Responsibilities</div><div class="jtxt">${j.responsibilities}</div>`:''}
-        ${j.requirements?`<div class="jstl">Requirements</div><div class="jtxt">${j.requirements}</div>`:''}
-      </div></div>
-    </div>`;
-  }).join('');
-}
-function toggleJob(id){
-  const el=document.getElementById(id);
-  if(el) el.classList.toggle('open');
+      ${j.summary?`<p class="jtxt" style="margin-top:8px">${j.summary}</p>`:''}
+      ${j.responsibilities?`<div class="jstl">Responsibilities</div><div class="jtxt">${j.responsibilities}</div>`:''}
+      ${j.requirements?`<div class="jstl">Requirements</div><div class="jtxt">${j.requirements}</div>`:''}
+    </div>`).join('')}`;
 }
 function ojm(editId=null){
   const j=editId?jobs.find(x=>x.id===editId):{};
@@ -3314,6 +3294,60 @@ async function deleteAccount() {
   } catch(e) {
     showToast('Error deleting account: ' + e.message, true);
   }
+}
+
+
+async function resetPin(memberId) {
+  const m = members.find(x => x.id === memberId);
+  if (!m) return;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="mttl">Reset PIN — ${m.name}</div>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.6">
+      Set a new 4-digit PIN for ${m.name}. Share the new PIN with them directly so they can log back in.
+    </p>
+    <div class="fg">
+      <label class="flbl2">New PIN</label>
+      <input type="text" id="new-pin" inputmode="numeric" maxlength="4" pattern="[0-9]{4}"
+        placeholder="Enter 4-digit PIN"
+        style="font-size:28px;letter-spacing:12px;font-family:monospace;text-align:center;height:56px"
+        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
+    </div>
+    <div class="err" id="pin-err" style="margin-top:8px"></div>
+    <div style="background:var(--ams);border:1px solid var(--am);border-radius:10px;padding:12px 16px;margin-top:16px;font-size:12px;color:var(--am);font-weight:500">
+      ⚠️ After resetting, ${m.name} will need to use this new PIN to log in. Make sure to share it with them.
+    </div>
+    <div class="mac" style="margin-top:20px">
+      <button onclick="cm()" class="btn btn-ghost">Cancel</button>
+      <button onclick="saveNewPin('${memberId}')" class="btn btn-primary">Save PIN</button>
+    </div>`;
+  om();
+  setTimeout(() => document.getElementById('new-pin')?.focus(), 100);
+}
+
+async function saveNewPin(memberId) {
+  const pin = document.getElementById('new-pin')?.value?.trim();
+  const errEl = document.getElementById('pin-err');
+
+  if (!pin || pin.length !== 4 || !/^[0-9]{4}$/.test(pin)) {
+    errEl.textContent = 'PIN must be exactly 4 digits (numbers only)';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const { error } = await sb.from('members').update({ pin }).eq('id', memberId);
+  if (error) {
+    errEl.textContent = 'Error saving PIN: ' + error.message;
+    errEl.classList.add('show');
+    return;
+  }
+
+  // Update local members array
+  const m = members.find(x => x.id === memberId);
+  if (m) m.pin = pin;
+
+  cm();
+  showToast('PIN updated for ' + (m?.name || 'team member') + '!');
 }
 
 // ══════════════════════════════════════════════════════
