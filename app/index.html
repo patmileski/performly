@@ -1455,6 +1455,7 @@ function dueDateStatus(dueDateStr, done) {
   if (diff <= 7) return { label: `Due in ${diff} day${diff===1?'':'s'}`, cls: 'chip-due-soon', rowCls: '' };
   return { label: dueDateStr, cls: 'chip cd', rowCls: '' };
 }
+const _krExpanded = new Set();
 function goalRowHTML(x, editable=true, readonly=false) {
   const krs = getKRs(x);
   const pct = krPct(x);
@@ -1473,9 +1474,9 @@ function goalRowHTML(x, editable=true, readonly=false) {
       </div>`; })()}
       ${hasDone?`<div class="kr-pbar" style="margin-top:5px"><div class="kr-pfill" style="width:${pct}%;background:${barCol}"></div></div>`:''}
       <button class="goal-expand-btn" onclick="toggleKRs('${x.id}')">
-        ▸ ${krs.length ? krs.length + ' key result' + (krs.length>1?'s':'') : 'Add key results'}
+        ${_krExpanded.has(x.id) ? '▾' : '▸'} ${krs.length ? krs.length + ' key result' + (krs.length>1?'s':'') : 'Add key results'}
       </button>
-      <div class="kr-section" id="krs-${x.id}" style="display:none">
+      <div class="kr-section" id="krs-${x.id}" style="display:${_krExpanded.has(x.id) ? 'block' : 'none'}">
         ${krs.length===0?'<div style="font-size:11px;color:var(--t3);margin-bottom:8px">No key results yet — add one below</div>':''}
         ${krs.map((k,i)=>`<div class="kr-item">
           <div class="kr-chk ${k.done?'on':''} ${readonly?'ro':''}" onclick="${readonly?'':' toggleKR(\'' + x.id + '\',' + i + ')'}"></div>
@@ -1499,6 +1500,7 @@ function toggleKRs(goalId) {
   const open = el.style.display !== 'none';
   el.style.display = open ? 'none' : 'block';
   if (btn) btn.innerHTML = (open ? '▸ ' : '▾ ') + btn.innerHTML.slice(2);
+  if (open) _krExpanded.delete(goalId); else _krExpanded.add(goalId);
   // Bind enter key on input when opened
   if (!open) {
     const input = document.getElementById('kr-input-' + goalId);
