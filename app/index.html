@@ -1765,7 +1765,6 @@ function pt() {
           ${assignBadge}${dueBadge}
         </div>
       </div>
-      <span class="ppill" style="background:${bg};color:${fg}">${t.priority}</span>
       <div style="display:flex;gap:4px;flex-shrink:0"><span class="ppill" style="background:${bg};color:${fg}">${t.priority}</span><button class="dbtn" onclick="editTask('${t.id}')" title="Edit" style="font-size:11px">✏️</button><button class="dbtn" onclick="deleteTask('${t.id}')" title="Delete" style="opacity:.5">✕</button></div>
     </div>`;}).join('');
 }
