@@ -470,6 +470,7 @@ select option{background:#0d1120}
       <div class="auth-switch">
         <span id="auth-switch-link" onclick="setAuthMode('signup')">Don't have an account? <span onclick="showScreen('pricing-screen')" style="color:var(--pu);cursor:pointer;font-weight:700">View plans & sign up free →</span></span>
       </div>
+
     </div>
 
     <!-- Employee PIN login -->
@@ -990,6 +991,12 @@ async function submitAuth() {
     go('overview');
     showScreen('app-screen');
   } else {
+    // Demo mode — special login for Pat@CoachOps360.com
+    if (email.toLowerCase() === DEMO_EMAIL.toLowerCase()) {
+      btn.disabled=false; btn.textContent='Sign In →';
+      loadDemo();
+      return;
+    }
     errEl.textContent='Signing in...'; errEl.style.background='rgba(56,182,255,.1)'; errEl.style.color='var(--bl)'; errEl.style.borderColor='rgba(56,182,255,.2)'; errEl.classList.add('show');
     console.log('Calling signInWithPassword...');
     let signInResult;
@@ -1242,6 +1249,7 @@ async function redirectToCheckout(planKey) {
 }
 
 const SUPERUSER_EMAIL = 'pmileski@gmail.com';
+const DEMO_EMAIL = 'pat@coachops360.com';
 
 function checkSubscriptionStatus() {
   if (!workspace) return;
@@ -1455,7 +1463,6 @@ function dueDateStatus(dueDateStr, done) {
   if (diff <= 7) return { label: `Due in ${diff} day${diff===1?'':'s'}`, cls: 'chip-due-soon', rowCls: '' };
   return { label: dueDateStr, cls: 'chip cd', rowCls: '' };
 }
-const _krExpanded = new Set();
 function goalRowHTML(x, editable=true, readonly=false) {
   const krs = getKRs(x);
   const pct = krPct(x);
@@ -1474,9 +1481,9 @@ function goalRowHTML(x, editable=true, readonly=false) {
       </div>`; })()}
       ${hasDone?`<div class="kr-pbar" style="margin-top:5px"><div class="kr-pfill" style="width:${pct}%;background:${barCol}"></div></div>`:''}
       <button class="goal-expand-btn" onclick="toggleKRs('${x.id}')">
-        ${_krExpanded.has(x.id) ? '▾' : '▸'} ${krs.length ? krs.length + ' key result' + (krs.length>1?'s':'') : 'Add key results'}
+        ▸ ${krs.length ? krs.length + ' key result' + (krs.length>1?'s':'') : 'Add key results'}
       </button>
-      <div class="kr-section" id="krs-${x.id}" style="display:${_krExpanded.has(x.id) ? 'block' : 'none'}">
+      <div class="kr-section" id="krs-${x.id}" style="display:none">
         ${krs.length===0?'<div style="font-size:11px;color:var(--t3);margin-bottom:8px">No key results yet — add one below</div>':''}
         ${krs.map((k,i)=>`<div class="kr-item">
           <div class="kr-chk ${k.done?'on':''} ${readonly?'ro':''}" onclick="${readonly?'':' toggleKR(\'' + x.id + '\',' + i + ')'}"></div>
@@ -1500,7 +1507,6 @@ function toggleKRs(goalId) {
   const open = el.style.display !== 'none';
   el.style.display = open ? 'none' : 'block';
   if (btn) btn.innerHTML = (open ? '▸ ' : '▾ ') + btn.innerHTML.slice(2);
-  if (open) _krExpanded.delete(goalId); else _krExpanded.add(goalId);
   // Bind enter key on input when opened
   if (!open) {
     const input = document.getElementById('kr-input-' + goalId);
@@ -1649,6 +1655,7 @@ async function saveGoal() {
 }
 
 async function toggleGoal(id, done) {
+  if(isDemoMode){const g=goals.find(x=>x.id===id);if(g){g.done=done;}rnd();return;}
   await sb.from('goals').update({done}).eq('id',id);
   const g = goals.find(x=>x.id===id); if(g) g.done=done;
   rnd();
@@ -1767,6 +1774,7 @@ function pt() {
           ${assignBadge}${dueBadge}
         </div>
       </div>
+      <span class="ppill" style="background:${bg};color:${fg}">${t.priority}</span>
       <div style="display:flex;gap:4px;flex-shrink:0"><span class="ppill" style="background:${bg};color:${fg}">${t.priority}</span><button class="dbtn" onclick="editTask('${t.id}')" title="Edit" style="font-size:11px">✏️</button><button class="dbtn" onclick="deleteTask('${t.id}')" title="Delete" style="opacity:.5">✕</button></div>
     </div>`;}).join('');
 }
@@ -2342,6 +2350,7 @@ async function saveEditNote(noteId, memberId) {
 }
 
 async function saveNote(memberId){
+  if(isDemoMode){await saveDemoNote(memberId);return;}
   const el=document.getElementById('ntxt');
   const text=(el.tagName==='TEXTAREA'?el.value:el.innerHTML).trim();
   if(!text||text==='<br>'||text==='<p><br></p>')return;
@@ -3349,6 +3358,110 @@ async function saveNewPin(memberId) {
 
   cm();
   showToast('PIN updated for ' + (m?.name || 'team member') + '!');
+}
+
+
+
+// ══════════════════════════════════════════════════════
+// DEMO MODE (pat@coachops360.com only)
+// ══════════════════════════════════════════════════════
+let isDemoMode = false;
+
+const DEMO_WORKSPACE = {
+  id: 'demo-workspace-001', name: 'ABC Co',
+  owner_id: 'demo-user-001', plan: 'growth',
+  plan_member_limit: 15, trial_ends_at: null
+};
+
+const DEMO_MEMBERS = [
+  { id: 'demo-m1', workspace_id: 'demo-workspace-001', name: 'Sarah Mitchell', role: 'Solutions Contract Coordinator', department: 'Strategic Partnerships', start_date: '2019-03-15', pin: '1234' },
+  { id: 'demo-m2', workspace_id: 'demo-workspace-001', name: 'Marcus Rivera', role: 'Sales Lead', department: 'Revenue', start_date: '2021-06-01', pin: '5678' },
+  { id: 'demo-m3', workspace_id: 'demo-workspace-001', name: 'Jordan Patel', role: 'Operations Manager', department: 'Operations', start_date: '2020-01-10', pin: '9012' },
+];
+
+const DEMO_GOALS = [
+  { id: 'demo-g1', workspace_id: 'demo-workspace-001', text: 'Compile full list of referral agreements and document revenue from each vendor', period: 'monthly', owner: 'Marcus Rivera', due_date: '2026-06-30', done: false, key_results: JSON.stringify([{text:'Identify all Referral Agreements',done:true},{text:'Document details of each Vendor',done:true},{text:'Build tracking in Salesforce',done:false},{text:'Upload all terms to each Account',done:false},{text:'Present findings to leadership',done:false}]) },
+  { id: 'demo-g2', workspace_id: 'demo-workspace-001', text: 'Document and formalize contract redline and term tracking process', period: 'weekly', owner: 'Sarah Mitchell', due_date: '2026-06-30', done: false, key_results: JSON.stringify([{text:'Map current process',done:false},{text:'Add to AI tool to formalize',done:false},{text:'Do GAP Analysis',done:false},{text:'Review with team lead',done:false}]) },
+  { id: 'demo-g3', workspace_id: 'demo-workspace-001', text: 'Attend Salesforce World Tour and identify tools for the business', period: 'annual', owner: 'Marcus Rivera', due_date: '2026-12-31', done: true, key_results: JSON.stringify([{text:'Identify at least one process improvement tool',done:true}]) },
+  { id: 'demo-g4', workspace_id: 'demo-workspace-001', text: 'Review and Update Contract Library', period: 'annual', owner: 'Sarah Mitchell', due_date: '2026-12-31', done: false, key_results: JSON.stringify([{text:'Review All Contracts',done:false},{text:'Update contracts and spelling',done:false},{text:'Determine correct storage location',done:false}]) },
+  { id: 'demo-g5', workspace_id: 'demo-workspace-001', text: 'Review Current MSA and make recommendations for updates', period: 'monthly', owner: 'Sarah Mitchell', due_date: '2026-07-31', done: false, key_results: JSON.stringify([{text:'Review all current MSAs',done:false},{text:'Compare to industry standards',done:false},{text:'Present recommendations',done:false}]) },
+  { id: 'demo-g6', workspace_id: 'demo-workspace-001', text: 'Build scalable onboarding process for new enterprise clients', period: 'longterm', owner: 'Jordan Patel', due_date: '2027-06-30', done: false, key_results: JSON.stringify([{text:'Document current onboarding steps',done:false},{text:'Identify bottlenecks',done:false},{text:'Build automated checklist',done:false},{text:'Pilot with 3 clients',done:false}]) },
+];
+
+const DEMO_TASKS = [
+  { id: 'demo-t1', workspace_id: 'demo-workspace-001', name: 'Update CRM account records for Q3', priority: 'high', category: 'CRM', notes: 'Ensure all contact info is current', done: false, assigned_to: 'Sarah Mitchell', due_date: '2026-07-15', emp_note: '' },
+  { id: 'demo-t2', workspace_id: 'demo-workspace-001', name: 'Complete annual compliance training', priority: 'medium', category: 'Training', notes: 'Required — link in company intranet', done: false, assigned_to: 'Marcus Rivera', due_date: '2026-07-31', emp_note: '' },
+  { id: 'demo-t3', workspace_id: 'demo-workspace-001', name: 'Review and sign updated NDA template', priority: 'high', category: 'Legal', notes: '', done: true, assigned_to: 'Jordan Patel', due_date: '2026-06-30', emp_note: 'Signed and returned to legal' },
+  { id: 'demo-t4', workspace_id: 'demo-workspace-001', name: 'Audit vendor contracts expiring in Q4', priority: 'medium', category: 'Admin', notes: 'Pull list from contract library', done: false, assigned_to: 'Sarah Mitchell', due_date: '2026-08-15', emp_note: '' },
+  { id: 'demo-t5', workspace_id: 'demo-workspace-001', name: 'Prepare Q3 pipeline report for leadership', priority: 'high', category: 'Reporting', notes: '', done: false, assigned_to: 'Marcus Rivera', due_date: '2026-07-10', emp_note: '' },
+];
+
+const DEMO_SESSIONS = [
+  { id: 'demo-s1', workspace_id: 'demo-workspace-001', member_id: 'demo-m1', member_name: 'Sarah Mitchell', session_type: '1:1', session_date: '2026-07-15', session_time: '09:00', location: 'Office', agenda: 'Q3 goal check-in, contract library update, MSA review progress', member_agenda: 'Ask about Q4 workload\nDiscuss career path' },
+  { id: 'demo-s2', workspace_id: 'demo-workspace-001', member_id: 'demo-m2', member_name: 'Marcus Rivera', session_type: '1:1', session_date: '2026-07-17', session_time: '10:30', location: 'Zoom', agenda: 'Pipeline review, referral agreement project update', member_agenda: 'Questions about commission structure' },
+  { id: 'demo-s3', workspace_id: 'demo-workspace-001', member_id: 'demo-m3', member_name: 'Jordan Patel', session_type: 'Check-in', session_date: '2026-07-22', session_time: '14:00', location: 'Conference Room B', agenda: 'Onboarding project update, Q3 operations review', member_agenda: '' },
+];
+
+const DEMO_COACHING_NOTES = [
+  { id: 'demo-n1', workspace_id: 'demo-workspace-001', member_id: 'demo-m1', note_type: '1on1', note_text: '<h2>1:1 — June 23, 2026</h2><p>Discussed Q3 goal progress. Sarah is on track with the contract library project. The MSA review is moving slower than expected — agreed to prioritize top 10 contracts first.</p><ul><li>Sarah to send updated contract list by June 30</li><li>Schedule follow-up for July 8</li></ul>', created_at: '2026-06-23T14:00:00Z' },
+  { id: 'demo-n2', workspace_id: 'demo-workspace-001', member_id: 'demo-m1', note_type: 'recognition', note_text: '<h2>Recognition</h2><p>Sarah did an outstanding job leading the vendor contract review. She identified 3 contracts with unfavorable terms that we renegotiated — saving the company an estimated $14,000 annually. Exactly the kind of proactive thinking we want to encourage.</p>', created_at: '2026-05-27T10:00:00Z' },
+  { id: 'demo-n3', workspace_id: 'demo-workspace-001', member_id: 'demo-m2', note_type: '1on1', note_text: '<h2>1:1 — June 15, 2026</h2><p>Marcus is tracking well against Q2 pipeline goals. The referral agreement project is progressing — all tier-1 vendors identified, now working through documentation.</p><p><strong>Development:</strong> Marcus wants to move toward a senior account executive role. Agreed to add this as a long-term goal next quarter.</p>', created_at: '2026-06-15T11:00:00Z' },
+  { id: 'demo-n4', workspace_id: 'demo-workspace-001', member_id: 'demo-m3', note_type: 'development', note_text: '<h2>Development Plan — Jordan Patel</h2><p>Jordan has expressed interest in expanding into people management. The enterprise onboarding project is a stretch assignment to develop those skills.</p><ul><li>Lead the onboarding project end-to-end</li><li>Mentor one junior team member</li><li>Complete Salesforce Admin certification</li></ul>', created_at: '2026-05-01T09:00:00Z' },
+];
+
+const DEMO_JOBS = [
+  { id: 'demo-j1', workspace_id: 'demo-workspace-001', title: 'Solutions Contract Coordinator', department: 'Strategic Partnerships', summary: 'Manages vendor contracts, referral agreements, and ensures ABC Co maximizes revenue from all partnership arrangements.', responsibilities: '• Review and maintain all vendor and client contracts\n• Track referral agreements and revenue\n• Coordinate with legal on contract negotiations\n• Maintain contract library', requirements: '• 3+ years contract management experience\n• Strong attention to detail\n• Salesforce experience preferred' },
+];
+
+function loadDemo() {
+  isDemoMode = true;
+  currentUser = { id: 'demo-user-001', email: DEMO_EMAIL, user_metadata: { full_name: 'Pat (Demo)' } };
+  workspace = DEMO_WORKSPACE;
+  members = DEMO_MEMBERS;
+  goals = DEMO_GOALS;
+  tasks = DEMO_TASKS;
+  sessions = DEMO_SESSIONS;
+  coaching_notes_cache = DEMO_COACHING_NOTES;
+  jobs = DEMO_JOBS;
+
+  setupSidebar();
+  go('overview');
+  showScreen('app-screen');
+  showToast('🎯 Demo mode active — data is not saved to the database');
+
+  setTimeout(() => {
+    const banner = document.getElementById('trial-banner');
+    if (banner) {
+      banner.style.display = 'flex';
+      banner.innerHTML = `<span style="font-size:13px;font-weight:600;color:var(--pu)">🎯 <strong>Demo Mode</strong> — You are viewing sample data. Nothing is saved.</span>
+        <button onclick="signOut()" class="btn btn-sm" style="background:rgba(108,99,255,.2);color:var(--pu);border:1px solid rgba(108,99,255,.3);font-weight:700">Exit Demo</button>`;
+    }
+  }, 600);
+}
+
+async function saveDemoNote(memberId) {
+  const el = document.getElementById('ntxt');
+  const text = (el?.innerHTML || '').trim();
+  if (!text || text === '<br>') { showToast('Please write something first', true); return; }
+  const titleEl = document.getElementById('note-title');
+  const title = titleEl?.value?.trim();
+  const noteText = title ? '<h2>' + title + '</h2>' + text : text;
+  const note = {
+    id: 'demo-note-' + Date.now(),
+    workspace_id: 'demo-workspace-001',
+    member_id: memberId,
+    note_type: document.getElementById('ntype')?.value || '1on1',
+    note_text: noteText,
+    created_at: new Date().toISOString()
+  };
+  DEMO_COACHING_NOTES.push(note);
+  if (el) el.innerHTML = '';
+  if (titleEl) titleEl.value = '';
+  cm();
+  const panelNotes = DEMO_COACHING_NOTES.filter(n => n.member_id === memberId).slice().reverse();
+  const nhist = document.getElementById('nhist');
+  if (nhist) nhist.innerHTML = renderNotes(panelNotes, memberId);
+  showToast('Note added! (Demo — not saved to database)');
 }
 
 // ══════════════════════════════════════════════════════
