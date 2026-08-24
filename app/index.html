@@ -1250,6 +1250,13 @@ async function redirectToCheckout(planKey) {
 
 const SUPERUSER_EMAIL = 'pmileski@gmail.com';
 const DEMO_EMAIL = 'pat@coachops360.com';
+const ENTERPRISE_DOMAINS = ['synergentcorp.com']; // Add more domains here as needed
+
+function isEnterpriseDomain(email) {
+  if (!email) return false;
+  const domain = email.split('@')[1]?.toLowerCase();
+  return ENTERPRISE_DOMAINS.includes(domain);
+}
 
 function checkSubscriptionStatus() {
   if (!workspace) return;
@@ -1257,6 +1264,13 @@ function checkSubscriptionStatus() {
   if (currentEmployee) return;
   // Superuser always has full access - no paywall, no banner
   if (currentUser && currentUser.email === SUPERUSER_EMAIL) return;
+  // Enterprise domain users get Pro access — no billing prompts
+  if (currentUser && isEnterpriseDomain(currentUser.email)) {
+    workspace.plan = 'active';
+    workspace.plan_member_limit = 999;
+    if (document.getElementById('trial-banner')) document.getElementById('trial-banner').style.display = 'none';
+    return;
+  }
   const plan = workspace.plan || 'trial';
   const trialEnds = workspace.trial_ends_at ? new Date(workspace.trial_ends_at) : null;
   const now = new Date();
