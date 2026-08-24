@@ -1545,7 +1545,16 @@ async function toggleKR(goalId, idx) {
   await sb.from('goals').update({ key_results: JSON.stringify(krs), done: allDone }).eq('id', goalId);
   g.key_results = JSON.stringify(krs);
   g.done = allDone;
+  // Save which KR sections are currently open so we can re-expand after re-render
+  const openKRs = [...document.querySelectorAll('[id^="krs-"]')]
+    .filter(el => el.style.display !== 'none')
+    .map(el => el.id.replace('krs-', ''));
   rnd();
+  // Re-expand the sections that were open
+  openKRs.forEach(id => {
+    const el = document.getElementById('krs-' + id);
+    if (el) el.style.display = 'block';
+  });
 }
 
 async function deleteKR(goalId, idx) {
